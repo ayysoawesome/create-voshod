@@ -44,7 +44,7 @@ export interface ProjectOptions {
   architecture: Architecture;
   /** Styling stack applied to the generated app. */
   styling: Styling;
-  /** Optional HTTP client integration; `null` means none. */
+  /** `axios` adds Axios; `null` generates the Fetch-based `httpClient` wrapper (no Axios dependency). */
   httpClient: HttpClient;
   /** Response/env validation stack; `null` means none (no Zod in generated API). */
   validationLibrary: ValidationLibrary;

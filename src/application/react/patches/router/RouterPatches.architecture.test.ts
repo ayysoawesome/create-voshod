@@ -74,6 +74,20 @@ test("BaseReactFilesFactory fsd does not add simple flat gitkeeps", () => {
   assert.equal(fsd.some((f) => f.relativePath === "src/components/.gitkeep"), false);
 });
 
+test("BaseReactFilesFactory fsd seeds slice dirs and shared ui/lib", () => {
+  const fsd = new BaseReactFilesFactory().create(
+    makeContext("fsd", "react-router-dom"),
+  );
+  assert.ok(fsd.some((f) => f.relativePath === "src/shared/ui/index.ts"));
+  assert.ok(fsd.some((f) => f.relativePath === "src/shared/lib/index.ts"));
+  assert.ok(fsd.some((f) => f.relativePath === "src/pages/.gitkeep"));
+  assert.ok(fsd.some((f) => f.relativePath === "src/widgets/.gitkeep"));
+  assert.ok(fsd.some((f) => f.relativePath === "src/features/.gitkeep"));
+  assert.ok(fsd.some((f) => f.relativePath === "src/entities/.gitkeep"));
+  assert.ok(fsd.some((f) => f.relativePath === "src/shared/assets/icons/.gitkeep"));
+  assert.ok(fsd.some((f) => f.relativePath === "src/shared/assets/images/.gitkeep"));
+});
+
 test("TanstackRouterPatchService simple uses colocated router.tsx and @/pages/home", async () => {
   const context = makeContext("simple", "@tanstack/react-router");
   const composer = new TsMorphCodeComposer();

@@ -2,6 +2,7 @@ import {
   AdditionalLibrary,
   Architecture,
   Framework,
+  HttpClient,
   RouterLibrary,
   Styling,
   ValidationLibrary,
@@ -33,6 +34,14 @@ export const FRAMEWORK_CHOICES: Choice<Framework>[] = [
 export const ARCHITECTURE_CHOICES: Choice<Architecture>[] = [
   { title: 'Simple', value: 'simple' },
   { title: 'FSD', value: 'fsd' },
+];
+
+/**
+ * HTTP transport for generated API stack (`null` = Fetch wrapper, no `axios` dependency).
+ */
+export const HTTP_CLIENT_CHOICES: Choice<HttpClient>[] = [
+  { title: 'Axios', value: 'axios' },
+  { title: 'Fetch API', value: null },
 ];
 
 /**

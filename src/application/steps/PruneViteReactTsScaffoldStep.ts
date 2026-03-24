@@ -43,7 +43,15 @@ export class PruneViteReactTsScaffoldStep implements GenerationStep {
       }
     }
 
-    await tryRemoveEmptyDir(path.join(root, "src", "assets"));
+    if (context.options.value.architecture === "fsd") {
+      try {
+        await fs.remove(path.join(root, "src", "assets"));
+      } catch {
+        // ignore missing or locked tree
+      }
+    } else {
+      await tryRemoveEmptyDir(path.join(root, "src", "assets"));
+    }
     await tryRemoveEmptyDir(path.join(root, "public"));
   }
 }
