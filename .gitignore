@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output (tsup)
+dist/
+
+# Local npm pack artifacts
+*.tgz
+
+# Smoke / playground generated projects
+.tmp/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Tests
+coverage/
+
+# TypeScript incremental
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+
+# Optional: experimental or nested sample apps (remove this line if you want example/ in git)
+example/
