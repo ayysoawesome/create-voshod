@@ -1,6 +1,6 @@
 {
   "name": "create-voshod",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Vite-based CLI tool for scaffolding single-page applications.",
   "keywords": [
     "vite",
