@@ -27,7 +27,7 @@
   },
   "type": "module",
   "bin": {
-    "create-voshod": "./bin/index.js"
+    "create-voshod": "bin/index.js"
   },
   "files": [
     "bin",
