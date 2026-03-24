@@ -43,6 +43,7 @@
     "prepublishOnly": "npm run test && npm run build",
     "test": "tsx --test src/**/*.test.ts",
     "test:cli:smoke": "tsx scripts/cli-smoke.ts",
+    "test:cli:matrix": "tsx scripts/cli-combination-matrix.ts",
     "test:cli:play": "tsx scripts/cli-playground.ts",
     "test:cli:play:full": "tsx scripts/cli-playground.ts --full"
   },

@@ -10,6 +10,9 @@ dist/
 # Smoke / playground generated projects
 .tmp/
 
+# CLI matrix JSONL logs (repo root)
+logs/
+
 # Logs
 *.log
 npm-debug.log*
@@ -37,3 +40,5 @@ Thumbs.db
 
 # Optional: experimental or nested sample apps (remove this line if you want example/ in git)
 example/
+
+.npmrpc
