@@ -31,6 +31,7 @@ import {
 } from '@/infrastructure/codegen/index.js';
 import { FileSystemWriterService } from '@/infrastructure/filesystem/FileSystemWriterService.js';
 import { NodeScaffoldFileReader } from '@/infrastructure/filesystem/NodeScaffoldFileReader.js';
+import { readOwnPackageIdentity } from '@/infrastructure/runtimePackageInfo.js';
 import { NpmRegistryUpdateCheckerService } from '@/infrastructure/updateChecker.js';
 
 /**
@@ -97,8 +98,7 @@ export class CliApplication {
    * Triggers non-blocking package update check and prints notification when newer version exists.
    */
   private notifyIfUpdateAvailable(): void {
-    const packageName = process.env.npm_package_name ?? 'create-voshod';
-    const currentVersion = process.env.npm_package_version ?? '0.1.0';
+    const { name: packageName, version: currentVersion } = readOwnPackageIdentity();
 
     void this.updateChecker
       .check(packageName, currentVersion)
