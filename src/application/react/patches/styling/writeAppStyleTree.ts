@@ -16,13 +16,21 @@ export function writeAppStyleTree(
   styling: Styling,
 ): void {
   const base = profile.stylesDirectory;
-  composer.upsertFile(
-    `${base}/variables.css`,
-    `:root {
+  const variablesCss =
+    styling === "tailwind"
+      ? `@theme {
+  /* COLORS */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+}
+`
+      : `:root {
   /* Design tokens — extend as needed */
 }
-`,
-  );
+`;
+  composer.upsertFile(`${base}/variables.css`, variablesCss);
   composer.upsertFile(
     `${base}/utility.css`,
     `/* Shared utility classes (non-Tailwind) */

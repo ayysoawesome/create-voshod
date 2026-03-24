@@ -12,13 +12,22 @@ import {
  * | Entry    | `src/index.tsx`                  | `src/app/index.tsx`            |
  * | App stub | `src/App.tsx`                    | `src/app/App.tsx`              |
  * | Shared   | —                                | `src/shared/index.ts`          |
- * | Empty dirs (`simple`) | `assets`, `components`, `hooks`, `utils` (`.gitkeep`) | — |
+ * | Empty dirs (`simple`) | `assets`, `components`, `hooks`, `utils` (`.gitkeep`) | FSD slices + `shared/ui`, `shared/lib`, `shared/assets/*` |
  */
 const SIMPLE_EMPTY_DIR_GITKEEPS = [
   "src/assets/.gitkeep",
   "src/components/.gitkeep",
   "src/hooks/.gitkeep",
   "src/utils/.gitkeep",
+] as const;
+
+const FSD_SLICE_GITKEEPS = [
+  "src/pages/.gitkeep",
+  "src/widgets/.gitkeep",
+  "src/features/.gitkeep",
+  "src/entities/.gitkeep",
+  "src/shared/assets/icons/.gitkeep",
+  "src/shared/assets/images/.gitkeep",
 ] as const;
 
 export class BaseReactFilesFactory {
@@ -65,11 +74,30 @@ export const App: FC = () => <div>Voshod React App</div>;
       base.push({
         relativePath: "src/shared/index.ts",
         content: `/**
- * FSD \`shared\` layer — add and re-export ui, lib, api as the project grows.
+ * FSD \`shared\` layer — re-export from \`ui\`, \`lib\`, \`api\`, \`config\` as needed.
  */
 export {};
 `,
       });
+      base.push({
+        relativePath: "src/shared/ui/index.ts",
+        content: `/**
+ * Shared UI primitives and layout building blocks.
+ */
+export {};
+`,
+      });
+      base.push({
+        relativePath: "src/shared/lib/index.ts",
+        content: `/**
+ * Cross-cutting helpers (formatters, small utilities).
+ */
+export {};
+`,
+      });
+      for (const relativePath of FSD_SLICE_GITKEEPS) {
+        base.push({ relativePath, content: "" });
+      }
     } else {
       for (const relativePath of SIMPLE_EMPTY_DIR_GITKEEPS) {
         base.push({ relativePath, content: "" });

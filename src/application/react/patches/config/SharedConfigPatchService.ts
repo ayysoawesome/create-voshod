@@ -81,5 +81,70 @@ export const envConfig = {
 
     composer.upsertFile(`${root}/index.ts`, `export { envConfig } from "./env";
 `);
+
+    composer.upsertFile(
+      ".env",
+      `VITE_API_BASE_URL=http://localhost:8080
+`,
+    );
+    composer.upsertFile(
+      ".env.example",
+      `# Copy to .env and adjust for your API origin
+VITE_API_BASE_URL=http://localhost:8080
+`,
+    );
+    composer.upsertFile(
+      ".gitignore",
+      `# Dependencies
+node_modules
+
+# Build
+dist
+dist-ssr
+*.local
+
+# Env (secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs & debug
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage
+*.lcov
+
+# Caches & tooling
+.vite
+.cache
+.turbo
+*.tsbuildinfo
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
+`,
+    );
+    composer.upsertFile(
+      ".cursorignore",
+      `node_modules/
+dist/
+dist-ssr/
+.git/
+coverage/
+*.tgz
+.tmp/
+logs/
+`,
+    );
   }
 }

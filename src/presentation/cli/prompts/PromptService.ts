@@ -4,6 +4,7 @@ import {
   ADDITIONAL_LIBRARY_CHOICES,
   ARCHITECTURE_CHOICES,
   FRAMEWORK_CHOICES,
+  HTTP_CLIENT_CHOICES,
   ROUTER_CHOICES,
   STYLING_CHOICES,
   VALIDATION_LIBRARY_CHOICES,
@@ -70,7 +71,7 @@ export class PromptService {
         type: 'select',
         name: 'httpClient',
         message: 'Select HTTP client',
-        choices: [{ title: 'Axios', value: 'axios' }],
+        choices: HTTP_CLIENT_CHOICES,
       },
       {
         type: 'select',

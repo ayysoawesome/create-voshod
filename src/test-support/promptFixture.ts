@@ -72,7 +72,7 @@ export function iterateLibPowerset(): AdditionalLibrary[][] {
 }
 
 const MATRIX_FRAMEWORK: Framework = "react";
-const MATRIX_HTTP: HttpClient = "axios";
+const MATRIX_HTTP_CLIENTS: HttpClient[] = ["axios", null];
 
 const MATRIX_ARCHITECTURES: Architecture[] = ["simple", "fsd"];
 const MATRIX_VALIDATION: ValidationLibrary[] = ["zod", null];
@@ -97,6 +97,7 @@ export const CLI_MATRIX_LIBS_FOR_BUILD: readonly AdditionalLibrary[] = [];
  */
 export const CLI_MATRIX_COMBINATION_COUNT =
   MATRIX_ARCHITECTURES.length *
+  MATRIX_HTTP_CLIENTS.length *
   MATRIX_VALIDATION.length *
   MATRIX_STYLING.length *
   MATRIX_ROUTERS.length *
@@ -104,27 +105,29 @@ export const CLI_MATRIX_COMBINATION_COUNT =
 
 /**
  * Enumerates {@link CliMatrixOptionBundle} rows for the CLI build matrix: react,
- * axios, and all combinations of architecture / validation / styling / router /
- * tanstackQuery, with a fixed {@link CLI_MATRIX_LIBS_FOR_BUILD} `libs` list.
+ * both HTTP modes (Axios vs Fetch), and all combinations of architecture / validation /
+ * styling / router / tanstackQuery, with a fixed {@link CLI_MATRIX_LIBS_FOR_BUILD} `libs` list.
  */
 export function enumerateCliMatrixOptionBundles(): CliMatrixOptionBundle[] {
   const bundles: CliMatrixOptionBundle[] = [];
 
   for (const architecture of MATRIX_ARCHITECTURES) {
-    for (const validationLibrary of MATRIX_VALIDATION) {
-      for (const styling of MATRIX_STYLING) {
-        for (const router of MATRIX_ROUTERS) {
-          for (const tanstackQuery of MATRIX_QUERY) {
-            bundles.push({
-              framework: MATRIX_FRAMEWORK,
-              architecture,
-              httpClient: MATRIX_HTTP,
-              validationLibrary,
-              styling,
-              router,
-              tanstackQuery,
-              libs: [...CLI_MATRIX_LIBS_FOR_BUILD],
-            });
+    for (const httpClient of MATRIX_HTTP_CLIENTS) {
+      for (const validationLibrary of MATRIX_VALIDATION) {
+        for (const styling of MATRIX_STYLING) {
+          for (const router of MATRIX_ROUTERS) {
+            for (const tanstackQuery of MATRIX_QUERY) {
+              bundles.push({
+                framework: MATRIX_FRAMEWORK,
+                architecture,
+                httpClient,
+                validationLibrary,
+                styling,
+                router,
+                tanstackQuery,
+                libs: [...CLI_MATRIX_LIBS_FOR_BUILD],
+              });
+            }
           }
         }
       }
