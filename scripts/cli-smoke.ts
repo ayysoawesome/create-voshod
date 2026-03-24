@@ -3,6 +3,11 @@ import { access, mkdir, rm } from "node:fs/promises";
 import { constants } from "node:fs";
 import { fileURLToPath } from "url";
 import { execa } from "execa";
+import {
+  cliOptionsToInjectedFixtureJson,
+  mergeCliMatrixBundle,
+  type CliMatrixOptionBundle,
+} from "../src/test-support/promptFixture.js";
 
 type SmokeOptions = {
   keep: boolean;
@@ -72,17 +77,19 @@ async function run(): Promise<void> {
 
   await mkdir(smokeRoot, { recursive: true });
 
-  const injectedFixture = JSON.stringify([
-    projectName,
-    "react", // framework
-    "simple", // architecture
-    "axios", // httpClient
-    "zod", // validationLibrary
-    "css", // styling
-    "react-router-dom", // router
-    true, // tanstackQuery
-    [], // libs: none
-  ]);
+  const smokeBundle: CliMatrixOptionBundle = {
+    framework: "react",
+    architecture: "simple",
+    httpClient: "axios",
+    validationLibrary: "zod",
+    styling: "css",
+    router: "react-router-dom",
+    tanstackQuery: true,
+    libs: [],
+  };
+  const injectedFixture = cliOptionsToInjectedFixtureJson(
+    mergeCliMatrixBundle(smokeBundle, projectName),
+  );
 
   console.log(`[smoke] repoRoot: ${repoRoot}`);
   console.log(`[smoke] projectPath: ${projectPath}`);
