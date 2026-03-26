@@ -28,7 +28,7 @@ export class YarnAdapter implements PackageManagerAdapter {
   createProjectArgs(projectName: string, template: string): string[] {
     return [
       'create',
-      'vite@latest',
+      'vite',
       projectName,
       '--template',
       template,

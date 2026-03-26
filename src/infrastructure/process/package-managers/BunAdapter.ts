@@ -30,7 +30,6 @@ export class BunAdapter implements PackageManagerAdapter {
       'create',
       'vite@latest',
       projectName,
-      '--',
       '--template',
       template,
       '--no-interactive',

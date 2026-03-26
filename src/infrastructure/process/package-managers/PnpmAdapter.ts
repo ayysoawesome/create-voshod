@@ -30,7 +30,6 @@ export class PnpmAdapter implements PackageManagerAdapter {
       'dlx',
       'create-vite@latest',
       projectName,
-      '--',
       '--template',
       template,
       '--no-interactive',
