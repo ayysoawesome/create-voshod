@@ -19,6 +19,7 @@ function makeContext(
       httpClient: null,
       validationLibrary: "zod",
       styling: "css",
+      formatter: "prettier",
       router,
       tanstackQuery: true,
       libs: [],

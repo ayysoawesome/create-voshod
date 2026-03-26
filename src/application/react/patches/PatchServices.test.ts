@@ -6,6 +6,7 @@ import { BaseReactFilesFactory } from "../base-files/BaseReactFilesFactory.js";
 import { TailwindPatchService } from "./styling/TailwindPatchService.js";
 import { SharedApiPatchService } from "./http/SharedApiPatchService.js";
 import { SharedConfigPatchService } from "./config/SharedConfigPatchService.js";
+import { FormatterPatchService } from "./toolchain/FormatterPatchService.js";
 
 test("TailwindPatchService adds styles under FSD profile without touching entry imports via main", async () => {
   const context = new GenerationContext({
@@ -16,6 +17,7 @@ test("TailwindPatchService adds styles under FSD profile without touching entry 
       httpClient: null,
       validationLibrary: "zod",
       styling: "tailwind",
+      formatter: "prettier",
       router: "react-router-dom",
       tanstackQuery: true,
       libs: [],
@@ -45,6 +47,7 @@ test("SharedApiPatchService creates axios stack under shared/api when axios sele
       httpClient: "axios",
       validationLibrary: "zod",
       styling: "css",
+      formatter: "prettier",
       router: "react-router-dom",
       tanstackQuery: true,
       libs: [],
@@ -107,6 +110,7 @@ test("SharedApiPatchService creates fetch stack under src/api for simple layout"
       httpClient: null,
       validationLibrary: "zod",
       styling: "css",
+      formatter: "prettier",
       router: "react-router-dom",
       tanstackQuery: true,
       libs: [],
@@ -160,6 +164,7 @@ test('SharedApiPatchService creates ofetch stack under shared/api when ofetch se
       httpClient: 'ofetch',
       validationLibrary: 'zod',
       styling: 'css',
+      formatter: 'prettier',
       router: 'react-router-dom',
       tanstackQuery: true,
       libs: [],
@@ -199,6 +204,7 @@ test("SharedConfigPatchService writes env files and ignore rules at project root
       httpClient: null,
       validationLibrary: "zod",
       styling: "css",
+      formatter: "prettier",
       router: "react-router-dom",
       tanstackQuery: true,
       libs: [],
@@ -218,6 +224,110 @@ test("SharedConfigPatchService writes env files and ignore rules at project root
   assert.ok(composer.getFile(".cursorignore")?.includes("node_modules/"));
 });
 
+test("FormatterPatchService switches package.json to biome toolchain", async () => {
+  const context = new GenerationContext({
+    options: {
+      projectName: "demo",
+      framework: "react",
+      architecture: "simple",
+      httpClient: null,
+      validationLibrary: "zod",
+      styling: "css",
+      formatter: "biome",
+      router: "react-router-dom",
+      tanstackQuery: true,
+      libs: [],
+    },
+    packageManager: "npm",
+    framework: "react",
+  });
+
+  const composer = new TsMorphCodeComposer();
+  composer.setBaseFiles([
+    {
+      relativePath: "package.json",
+      content: JSON.stringify(
+        {
+          scripts: {
+            lint: "eslint .",
+          },
+          devDependencies: {
+            eslint: "^9.0.0",
+            "@eslint/js": "^9.0.0",
+            "eslint-plugin-react-hooks": "^7.0.0",
+            "eslint-plugin-react-refresh": "^0.5.0",
+            "typescript-eslint": "^8.0.0",
+            globals: "^16.0.0",
+          },
+        },
+        null,
+        2,
+      ),
+    },
+  ]);
+
+  await new FormatterPatchService().apply(context, composer);
+
+  const pkg = composer.getFile("package.json");
+  assert.ok(pkg?.includes('"lint": "biome check ."'));
+  assert.ok(pkg?.includes('"format": "biome format ."'));
+  assert.ok(pkg?.includes('"format:write": "biome format --write ."'));
+  assert.equal(pkg?.includes('"eslint"'), false);
+  assert.equal(pkg?.includes('"@eslint/js"'), false);
+  assert.ok(composer.hasFile("biome.json"));
+  const biome = composer.getFile("biome.json");
+  assert.ok(biome?.includes('"tailwindDirectives": true'));
+  assert.ok(biome?.includes('"quoteStyle": "single"'));
+  assert.ok(biome?.includes('"semicolons": "always"'));
+});
+
+test("FormatterPatchService keeps eslint flow for prettier option", async () => {
+  const context = new GenerationContext({
+    options: {
+      projectName: "demo",
+      framework: "react",
+      architecture: "simple",
+      httpClient: null,
+      validationLibrary: "zod",
+      styling: "css",
+      formatter: "prettier",
+      router: "react-router-dom",
+      tanstackQuery: true,
+      libs: [],
+    },
+    packageManager: "npm",
+    framework: "react",
+  });
+
+  const composer = new TsMorphCodeComposer();
+  composer.setBaseFiles([
+    {
+      relativePath: "package.json",
+      content: JSON.stringify(
+        {
+          scripts: {
+            lint: "eslint .",
+          },
+          devDependencies: {
+            eslint: "^9.0.0",
+          },
+        },
+        null,
+        2,
+      ),
+    },
+  ]);
+
+  await new FormatterPatchService().apply(context, composer);
+  const pkg = composer.getFile("package.json");
+  assert.ok(pkg?.includes('"lint": "eslint ."'));
+  assert.ok(pkg?.includes('"format:write": "prettier --write ."'));
+  assert.equal(composer.hasFile("biome.json"), false);
+  const prettier = composer.getFile(".prettierrc");
+  assert.ok(prettier?.includes('"singleQuote": true'));
+  assert.ok(prettier?.includes('"semi": true'));
+});
+
 test("SharedApiPatchService omits query client files when tanstackQuery is false", async () => {
   const context = new GenerationContext({
     options: {
@@ -227,6 +337,7 @@ test("SharedApiPatchService omits query client files when tanstackQuery is false
       httpClient: null,
       validationLibrary: "zod",
       styling: "css",
+      formatter: "prettier",
       router: "react-router-dom",
       tanstackQuery: false,
       libs: [],
@@ -255,6 +366,7 @@ test("SharedApiPatchService omits Zod from generated API when validationLibrary 
       httpClient: null,
       validationLibrary: null,
       styling: "css",
+      formatter: "prettier",
       router: "react-router-dom",
       tanstackQuery: true,
       libs: [],

@@ -44,6 +44,7 @@ test("GenerateProjectUseCase executes strategy steps", async () => {
       httpClient: "axios",
       validationLibrary: "zod",
       styling: "css",
+      formatter: "prettier",
       router: "react-router-dom",
       tanstackQuery: true,
       libs: [],

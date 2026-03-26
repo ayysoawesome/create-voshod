@@ -10,6 +10,14 @@ export class ReactDependencyPlanner {
    * @param context Runtime generation context.
    */
   plan(context: GenerationContext): void {
+    if (context.options.value.formatter === "prettier") {
+      context.runtime.addDevDependency("prettier");
+    }
+
+    if (context.options.value.formatter === "biome") {
+      context.runtime.addDevDependency("@biomejs/biome");
+    }
+
     if (context.options.value.tanstackQuery) {
       context.runtime.addProdDependency("@tanstack/react-query");
     }

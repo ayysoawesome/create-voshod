@@ -10,6 +10,7 @@ const createOptions = (projectName: string): CLIOptions => ({
   framework: "react",
   architecture: "simple",
   styling: "css",
+  formatter: "prettier",
   httpClient: null,
   validationLibrary: "zod",
   router: "react-router-dom",

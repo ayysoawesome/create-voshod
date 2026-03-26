@@ -13,7 +13,7 @@ test("injected answers length matches PromptService.askOptions field count", () 
     enumerateCliMatrixOptionBundles()[0],
     "probe",
   );
-  assert.equal(cliOptionsToInjectedAnswers(options).length, 9);
+  assert.equal(cliOptionsToInjectedAnswers(options).length, 10);
 });
 
 test("lib powerset size is 2^n for n additional-library prompt choices", () => {

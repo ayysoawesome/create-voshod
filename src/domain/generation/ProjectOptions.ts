@@ -1,36 +1,43 @@
 /**
  * Supported project framework targets.
  */
-export type Framework = "react" | "vue" | "nextjs" | "tanstack-start";
+export type Framework = 'react' | 'vue' | 'nextjs' | 'tanstack-start';
 /**
  * High-level project architecture mode.
  */
-export type Architecture = "simple" | "fsd";
+export type Architecture = 'simple' | 'fsd';
 /**
  * Supported styling presets for generated project.
  */
-export type Styling = "tailwind" | "css";
+export type Styling = 'tailwind' | 'css';
+/**
+ * Supported code formatter options.
+ */
+export type Formatter = 'prettier' | 'biome';
 
 /**
  * Supported HTTP client options.
  */
-export type HttpClient = "axios" | "ofetch" | null;
+export type HttpClient = 'axios' | 'ofetch' | null;
 /**
  * Supported router options.
  */
-export type RouterLibrary = "@tanstack/react-router" | "react-router-dom" | null;
+export type RouterLibrary =
+  | '@tanstack/react-router'
+  | 'react-router-dom'
+  | null;
 /**
  * Runtime validation for API responses and env; `null` means no validation library.
  */
-export type ValidationLibrary = "zod" | null;
+export type ValidationLibrary = 'zod' | null;
 /**
  * Optional additional libraries selectable in prompt flow.
  */
 export type AdditionalLibrary =
-  | "zustand"
-  | "@tanstack/react-table"
-  | "@tanstack/react-form"
-  | "react-hook-form";
+  | 'zustand'
+  | '@tanstack/react-table'
+  | '@tanstack/react-form'
+  | 'react-hook-form';
 
 /**
  * User-facing options collected from CLI prompts.
@@ -44,6 +51,8 @@ export interface ProjectOptions {
   architecture: Architecture;
   /** Styling stack applied to the generated app. */
   styling: Styling;
+  /** Code formatter preset for generated project config and dev tooling. */
+  formatter: Formatter;
   /** `axios` adds Axios; `ofetch` adds ofetch; `null` generates the Fetch-based `httpClient` wrapper (no extra dependency). */
   httpClient: HttpClient;
   /** Response/env validation stack; `null` means none (no Zod in generated API). */
@@ -76,4 +85,3 @@ export type ValidationStack = ValidationLibrary;
  * Backward-compatible alias for additional library type.
  */
 export type Libs = AdditionalLibrary;
-
