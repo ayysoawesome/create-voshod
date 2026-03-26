@@ -58,25 +58,25 @@ export class PromptService {
       {
         type: 'select',
         name: 'framework',
-        message: 'Select framework (more frameworks will be supported later)',
+        message: 'Framework',
         choices: FRAMEWORK_CHOICES,
       },
       {
         type: 'select',
         name: 'architecture',
-        message: 'Select architecture',
+        message: 'Architecture',
         choices: ARCHITECTURE_CHOICES,
       },
       {
         type: 'select',
         name: 'httpClient',
-        message: 'Select HTTP client',
+        message: 'HTTP client',
         choices: HTTP_CLIENT_CHOICES,
       },
       {
         type: 'select',
         name: 'validationLibrary',
-        message: 'Validation library (API / env)',
+        message: 'Validation library',
         choices: VALIDATION_LIBRARY_CHOICES,
       },
       {
@@ -88,7 +88,7 @@ export class PromptService {
       {
         type: 'select',
         name: 'router',
-        message: 'Choose router library',
+        message: 'Router library',
         choices: ROUTER_CHOICES,
       },
       {
