@@ -1,6 +1,6 @@
-import { GenerationContext } from "@/domain/generation/index.js";
-import { IPackageInstaller } from "@/domain/ports/index.js";
-import { GenerationStep } from "./GenerationStep.js";
+import { GenerationContext } from '@/domain/generation/index.js';
+import { IPackageInstaller } from '@/domain/ports/index.js';
+import { GenerationStep } from './GenerationStep.js';
 
 /**
  * Pipeline step that installs planned production and development dependencies.
@@ -26,4 +26,3 @@ export class InstallDependenciesStep implements GenerationStep {
     );
   }
 }
-

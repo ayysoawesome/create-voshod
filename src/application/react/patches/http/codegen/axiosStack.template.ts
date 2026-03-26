@@ -30,40 +30,17 @@ export const baseAxiosInstance = createAxiosInstance(envConfig.apiBaseUrl);
 
 export function axiosBaseServiceSource(kind: ValidationCodegenKind): string {
   if (kind === "none") {
-    return `import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { AxiosHeaders } from "axios";
+    return `import type { AxiosInstance } from "axios";
 import { baseAxiosInstance } from "./axios";
 import { resolveContentType } from "./resolveContentType";
-import { ApiError } from "./errors";
 import { toApiError } from "./errorAdapter";
-
-const axiosConfigForMutation = (
-  body: unknown,
-  config?: AxiosRequestConfig,
-): AxiosRequestConfig => {
-  const extra = { ...config };
-  delete extra.headers;
-  const headers = new AxiosHeaders();
-  if (body !== undefined) {
-    headers.set("Content-Type", resolveContentType(body));
-  }
-  if (config?.headers !== undefined) {
-    const incoming = new AxiosHeaders(config.headers);
-    incoming.forEach((value: string, key: string) => {
-      if (typeof value === "string") {
-        headers.set(key, value);
-      }
-    });
-  }
-  return { ...extra, headers };
-};
+import { envConfig } from "../config";
 
 export type HttpMethod = "get" | "post" | "put" | "patch" | "delete";
 
-export type RequestConfig<TData = unknown> = AxiosRequestConfig<TData>;
-
 export interface RequestOptions {
-  config?: RequestConfig<unknown>;
+  headers?: Record<string, string>;
+  queryParams?: Record<string, string>;
 }
 
 export interface BaseServiceOptions {
@@ -89,63 +66,77 @@ export abstract class BaseService {
   protected async request(
     method: HttpMethod,
     path: string,
-    options?: { body?: unknown; config?: RequestConfig<unknown> },
+    options?: {
+      body?: unknown;
+      headers?: Record<string, string>;
+      queryParams?: Record<string, string>;
+    },
   ): Promise<unknown> {
     const url = this.buildUrl(path);
-    const config = options?.config;
+    const queryParams = options?.queryParams;
     const body = options?.body;
+    const headers = {
+      ...options?.headers,
+      "Content-Type": resolveContentType(body),
+    };
 
     try {
-      let response: AxiosResponse<unknown>;
-      switch (method) {
-        case "get":
-          response = await this.client.get(url, config);
-          break;
-        case "delete":
-          response = await this.client.delete(url, config);
-          break;
-        case "post":
-          response = await this.client.post(url, body, axiosConfigForMutation(body, config));
-          break;
-        case "put":
-          response = await this.client.put(url, body, axiosConfigForMutation(body, config));
-          break;
-        case "patch":
-          response = await this.client.patch(url, body, axiosConfigForMutation(body, config));
-          break;
-        default:
-          throw new ApiError({ message: \`Unsupported HTTP method: \${method}\`, kind: "unknown" });
-      }
-      return response.data;
+      const response = await this.client.request({
+        url,
+        method,
+        params: queryParams,
+        data: body,
+        headers,
+      });
+
+      return response.data as unknown;
     } catch (error) {
       throw toApiError(error);
     }
   }
 
-  protected async get(path: string, options?: RequestOptions): Promise<unknown> {
-    return this.request("get", path, { config: options?.config });
+  public async get(path: string, options?: RequestOptions): Promise<unknown> {
+    return this.request("get", path, {
+      headers: options?.headers,
+      queryParams: options?.queryParams,
+    });
   }
 
-  protected async post(path: string, body: unknown, options?: RequestOptions): Promise<unknown> {
-    return this.request("post", path, { body, config: options?.config });
+  public async post(path: string, body: unknown, options?: RequestOptions): Promise<unknown> {
+    return this.request("post", path, {
+      body,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
+    });
   }
 
-  protected async put(path: string, body: unknown, options?: RequestOptions): Promise<unknown> {
-    return this.request("put", path, { body, config: options?.config });
+  public async put(path: string, body: unknown, options?: RequestOptions): Promise<unknown> {
+    return this.request("put", path, {
+      body,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
+    });
   }
 
-  protected async patch(path: string, body: unknown, options?: RequestOptions): Promise<unknown> {
-    return this.request("patch", path, { body, config: options?.config });
+  public async patch(path: string, body: unknown, options?: RequestOptions): Promise<unknown> {
+    return this.request("patch", path, {
+      body,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
+    });
   }
 
-  protected async delete(path: string, options?: RequestOptions): Promise<unknown> {
-    return this.request("delete", path, { config: options?.config });
+  public async delete(path: string, options?: RequestOptions): Promise<unknown> {
+    return this.request("delete", path, {
+      headers: options?.headers,
+      queryParams: options?.queryParams,
+    });
   }
 }
 
 class RootBaseService extends BaseService {
   constructor() {
-    super({ basePath: "" });
+    super({ basePath: envConfig.apiBaseUrl });
   }
 }
 
@@ -153,43 +144,20 @@ export const baseService = new RootBaseService();
 `;
   }
 
-  return `import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { AxiosHeaders } from "axios";
+  return `import type { AxiosInstance } from "axios";
 import type { ZodType } from "zod";
 import { baseAxiosInstance } from "./axios";
 import { resolveContentType } from "./resolveContentType";
-import { ApiError } from "./errors";
 import { validateResponse } from "./validation";
 import { toApiError } from "./errorAdapter";
-
-const axiosConfigForMutation = (
-  body: unknown,
-  config?: AxiosRequestConfig,
-): AxiosRequestConfig => {
-  const extra = { ...config };
-  delete extra.headers;
-  const headers = new AxiosHeaders();
-  if (body !== undefined) {
-    headers.set("Content-Type", resolveContentType(body));
-  }
-  if (config?.headers !== undefined) {
-    const incoming = new AxiosHeaders(config.headers);
-    incoming.forEach((value: string, key: string) => {
-      if (typeof value === "string") {
-        headers.set(key, value);
-      }
-    });
-  }
-  return { ...extra, headers };
-};
+import { envConfig } from "../config";
 
 export type HttpMethod = "get" | "post" | "put" | "patch" | "delete";
 
-export type RequestConfig<TData = unknown> = AxiosRequestConfig<TData>;
-
 export interface RequestOptions<TResponse> {
-  config?: RequestConfig<unknown>;
   schema?: ZodType<TResponse>;
+  headers?: Record<string, string>;
+  queryParams?: Record<string, string>;
 }
 
 export interface BaseServiceOptions {
@@ -215,90 +183,95 @@ export abstract class BaseService {
   protected async request<TResponse>(
     method: HttpMethod,
     path: string,
-    options?: { body?: unknown; config?: RequestConfig<unknown>; schema?: ZodType<TResponse> },
+    options?: {
+      body?: unknown;
+      headers?: Record<string, string>;
+      queryParams?: Record<string, string>;
+      schema?: ZodType<TResponse>;
+    },
   ): Promise<TResponse | unknown> {
     const url = this.buildUrl(path);
-    const config = options?.config;
+    const queryParams = options?.queryParams;
     const body = options?.body;
+    const headers = {
+      ...options?.headers,
+      "Content-Type": resolveContentType(body),
+    };
     const schema = options?.schema;
 
     try {
-      let response: AxiosResponse<unknown>;
-      switch (method) {
-        case "get":
-          response = await this.client.get(url, config);
-          break;
-        case "delete":
-          response = await this.client.delete(url, config);
-          break;
-        case "post":
-          response = await this.client.post(url, body, axiosConfigForMutation(body, config));
-          break;
-        case "put":
-          response = await this.client.put(url, body, axiosConfigForMutation(body, config));
-          break;
-        case "patch":
-          response = await this.client.patch(url, body, axiosConfigForMutation(body, config));
-          break;
-        default:
-          throw new ApiError({ message: \`Unsupported HTTP method: \${method}\`, kind: "unknown" });
-      }
-      const data = response.data;
+      const response = await this.client.request({
+        url,
+        method,
+        params: queryParams,
+        data: body,
+        headers,
+      });
+
       if (schema) {
-        return validateResponse(schema, data);
+        return validateResponse(schema, response.data);
       }
-      return data;
+
+      return response.data as unknown;
     } catch (error) {
       throw toApiError(error);
     }
   }
 
-  protected async get<TResponse>(path: string, options?: RequestOptions<TResponse>): Promise<TResponse | unknown> {
+  public async get<TResponse>(path: string, options?: RequestOptions<TResponse>): Promise<TResponse | unknown> {
     return this.request<TResponse>("get", path, {
-      config: options?.config,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
       schema: options?.schema,
     });
   }
 
-  protected async post<TResponse>(
+  public async post<TResponse>(
     path: string,
     body: unknown,
     options?: RequestOptions<TResponse>,
   ): Promise<TResponse | unknown> {
     return this.request<TResponse>("post", path, {
       body,
-      config: options?.config,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
       schema: options?.schema,
     });
   }
 
-  protected async put<TResponse>(
+  public async put<TResponse>(
     path: string,
     body: unknown,
     options?: RequestOptions<TResponse>,
   ): Promise<TResponse | unknown> {
     return this.request<TResponse>("put", path, {
       body,
-      config: options?.config,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
       schema: options?.schema,
     });
   }
 
-  protected async patch<TResponse>(
+  public async patch<TResponse>(
     path: string,
     body: unknown,
     options?: RequestOptions<TResponse>,
   ): Promise<TResponse | unknown> {
     return this.request<TResponse>("patch", path, {
       body,
-      config: options?.config,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
       schema: options?.schema,
     });
   }
 
-  protected async delete<TResponse>(path: string, options?: RequestOptions<TResponse>): Promise<TResponse | unknown> {
+  public async delete<TResponse>(
+    path: string,
+    options?: RequestOptions<TResponse>,
+  ): Promise<TResponse | unknown> {
     return this.request<TResponse>("delete", path, {
-      config: options?.config,
+      headers: options?.headers,
+      queryParams: options?.queryParams,
       schema: options?.schema,
     });
   }
@@ -306,7 +279,7 @@ export abstract class BaseService {
 
 class RootBaseService extends BaseService {
   constructor() {
-    super({ basePath: "" });
+    super({ basePath: envConfig.apiBaseUrl });
   }
 }
 

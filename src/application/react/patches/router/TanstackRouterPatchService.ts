@@ -1,11 +1,11 @@
-import { IReactPatchService } from "../../../patches/IReactPatchService.js";
+import { IReactPatchService } from '../../../patches/IReactPatchService.js';
 import {
   GenerationContext,
   pagesHomeImport,
   resolveReactLayoutProfile,
-} from "@/domain/generation/index.js";
-import { ICodeComposer } from "@/domain/ports/index.js";
-import { morphAppForTanstackRouter } from "@/infrastructure/codegen/editors/AppRouterZoneMorph.js";
+} from '@/domain/generation/index.js';
+import { ICodeComposer } from '@/domain/ports/index.js';
+import { morphAppForTanstackRouter } from '@/infrastructure/codegen/editors/AppRouterZoneMorph.js';
 
 const homePageUi = `import { type FC } from "react";
 
@@ -19,24 +19,26 @@ export const HomePage: FC = () => {
  */
 export class TanstackRouterPatchService implements IReactPatchService {
   supports(context: GenerationContext): boolean {
-    return context.options.value.router === "@tanstack/react-router";
+    return context.options.value.router === '@tanstack/react-router';
   }
 
-  async apply(context: GenerationContext, composer: ICodeComposer): Promise<void> {
-    const profile = resolveReactLayoutProfile(context.options.value.architecture);
+  async apply(
+    context: GenerationContext,
+    composer: ICodeComposer,
+  ): Promise<void> {
+    const profile = resolveReactLayoutProfile(
+      context.options.value.architecture,
+    );
     const homeModule = pagesHomeImport(profile);
 
-    composer.upsertFile(
-      `${profile.pagesHomeDir}/ui/HomePage.tsx`,
-      homePageUi,
-    );
+    composer.upsertFile(`${profile.pagesHomeDir}/ui/HomePage.tsx`, homePageUi);
     composer.upsertFile(
       `${profile.pagesHomeDir}/index.ts`,
       `export { HomePage } from "./ui/HomePage";
 `,
     );
 
-    if (profile.tanstackLayout === "fsd_tree") {
+    if (profile.tanstackLayout === 'fsd_tree') {
       composer.upsertFile(
         `${profile.appDirectory}/router/index.ts`,
         `export { router } from "./router";
@@ -67,7 +69,7 @@ import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "./rootRoute";
 
 export const homeRoute = createRoute({
-  path: "/home",
+  path: "/",
   getParentRoute: () => rootRoute,
   component: HomePage,
 });
@@ -97,7 +99,7 @@ export const RootLayout: FC = () => {
     }
 
     composer.upsertFile(
-      "src/components/RootLayout.tsx",
+      'src/components/RootLayout.tsx',
       `import { Outlet } from "@tanstack/react-router";
 import { type FC } from "react";
 
@@ -109,7 +111,7 @@ export const RootLayout: FC = () => (
 `,
     );
     composer.upsertFile(
-      "src/router.tsx",
+      'src/router.tsx',
       `import {
   createRootRoute,
   createRoute,
@@ -121,7 +123,7 @@ import { RootLayout } from "@/components/RootLayout";
 const rootRoute = createRootRoute({ component: RootLayout });
 
 const homeRoute = createRoute({
-  path: "/home",
+  path: "/",
   getParentRoute: () => rootRoute,
   component: HomePage,
 });
@@ -135,11 +137,19 @@ export const router = createRouter({ routeTree });
     this.applyTanstackAppMorph(composer, profile.appComponentPath);
   }
 
-  private applyTanstackAppMorph(composer: ICodeComposer, appComponentPath: string): void {
+  private applyTanstackAppMorph(
+    composer: ICodeComposer,
+    appComponentPath: string,
+  ): void {
     const current = composer.getFile(appComponentPath);
     if (current === null) {
-      throw new Error(`Expected ${appComponentPath} to exist before TanStack router morph.`);
+      throw new Error(
+        `Expected ${appComponentPath} to exist before TanStack router morph.`,
+      );
     }
-    composer.upsertFile(appComponentPath, morphAppForTanstackRouter(current, appComponentPath));
+    composer.upsertFile(
+      appComponentPath,
+      morphAppForTanstackRouter(current, appComponentPath),
+    );
   }
 }

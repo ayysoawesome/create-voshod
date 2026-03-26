@@ -14,7 +14,7 @@ export type Styling = "tailwind" | "css";
 /**
  * Supported HTTP client options.
  */
-export type HttpClient = "axios" | null;
+export type HttpClient = "axios" | "ofetch" | null;
 /**
  * Supported router options.
  */
@@ -44,7 +44,7 @@ export interface ProjectOptions {
   architecture: Architecture;
   /** Styling stack applied to the generated app. */
   styling: Styling;
-  /** `axios` adds Axios; `null` generates the Fetch-based `httpClient` wrapper (no Axios dependency). */
+  /** `axios` adds Axios; `ofetch` adds ofetch; `null` generates the Fetch-based `httpClient` wrapper (no extra dependency). */
   httpClient: HttpClient;
   /** Response/env validation stack; `null` means none (no Zod in generated API). */
   validationLibrary: ValidationLibrary;

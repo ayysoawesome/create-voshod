@@ -22,7 +22,7 @@ type Choice<TValue> = {
  * Temporarily only React: other `Framework` values exist in domain types for future strategies.
  */
 export const FRAMEWORK_CHOICES: Choice<Framework>[] = [
-  { title: 'React (Vite)', value: 'react' },
+  { title: 'React', value: 'react' },
   // { title: "Vue (Vite)", value: "vue" },
   // { title: "Next.js", value: "nextjs" },
   // { title: "TanStack Start", value: "tanstack-start" },
@@ -41,6 +41,7 @@ export const ARCHITECTURE_CHOICES: Choice<Architecture>[] = [
  */
 export const HTTP_CLIENT_CHOICES: Choice<HttpClient>[] = [
   { title: 'Axios', value: 'axios' },
+  { title: 'ofetch', value: 'ofetch' },
   { title: 'Fetch API', value: null },
 ];
 

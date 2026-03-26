@@ -1,5 +1,5 @@
 export function indexApiSource(
-  axiosMode: boolean,
+  httpClient: "axios" | "ofetch" | null,
   useTanStackQuery: boolean,
   withValidation: boolean,
 ): string {
@@ -11,14 +11,16 @@ export function indexApiSource(
     ? `export { validateResponse } from "./validation";
 `
     : "";
-  const httpExport = axiosMode
-    ? ""
-    : `export { httpClient } from "./httpClient";
-`;
-  const axiosExport = axiosMode
-    ? `export { baseAxiosInstance } from "./axios";
+  const httpExport =
+    httpClient === null
+      ? `export { httpClient } from "./httpClient";
 `
-    : "";
+      : "";
+  const axiosExport =
+    httpClient === "axios"
+      ? `export { baseAxiosInstance } from "./axios";
+`
+      : "";
   return `${queryExport}export { baseService } from "./baseService";
 export { ApiError, isApiError } from "./errors";
 export { toApiError } from "./errorAdapter";

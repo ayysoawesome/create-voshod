@@ -1,4 +1,5 @@
 import path from "path";
+import { ValidationError } from "@/domain/errors/index.js";
 import { CLIOptions, GenerationContext } from "@/domain/generation/index.js";
 import { PackageManagerDetectorService } from "@/infrastructure/process/index.js";
 
@@ -18,9 +19,17 @@ export class GenerationContextFactory {
    * @returns Fully initialized generation context.
    */
   create(options: CLIOptions): GenerationContext {
+    const projectName = options.projectName.trim();
+    if (projectName.length === 0) {
+      throw new ValidationError("Project name is required.");
+    }
+
     return new GenerationContext({
-      options,
-      projectPath: path.resolve(options.projectName),
+      options: {
+        ...options,
+        projectName,
+      },
+      projectPath: path.resolve(projectName),
       packageManager: this.packageManagerDetector.detect(),
       framework: options.framework,
     });
