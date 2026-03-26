@@ -54,6 +54,8 @@ export class PromptService {
         type: 'text',
         name: 'projectName',
         message: 'Project name:',
+        validate: (value: string) =>
+          value.trim().length > 0 ? true : 'Project name is required.',
       },
       {
         type: 'select',

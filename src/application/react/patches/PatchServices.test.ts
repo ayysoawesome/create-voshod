@@ -81,9 +81,16 @@ test("SharedApiPatchService creates axios stack under shared/api when axios sele
   assert.ok(base?.includes("./errorAdapter"));
   assert.ok(base?.includes("./validation"));
   assert.ok(base?.includes("resolveContentType"));
-  assert.ok(base?.includes("protected async put"));
-  assert.ok(base?.includes("protected async patch"));
-  assert.ok(base?.includes("protected async delete"));
+  assert.ok(base?.includes("queryParams"));
+  assert.ok(base?.includes("this.client.request"));
+  assert.ok(base?.includes("params:"));
+  assert.ok(base?.includes("data:"));
+  assert.ok(base?.includes("basePath: envConfig.apiBaseUrl"));
+  assert.equal(base?.includes("AxiosHeaders"), false);
+  assert.equal(base?.includes("axiosConfigForMutation"), false);
+  assert.ok(base?.includes("public async put"));
+  assert.ok(base?.includes("public async patch"));
+  assert.ok(base?.includes("public async delete"));
   const index = composer.getFile("src/shared/api/index.ts");
   assert.equal(index?.includes("httpClient"), false);
   assert.ok(index?.includes("baseAxiosInstance"));
@@ -142,6 +149,45 @@ test("SharedApiPatchService creates fetch stack under src/api for simple layout"
   const adapter = composer.getFile("src/api/errorAdapter.ts");
   assert.ok(adapter?.includes("ApiErrorNormalizer"));
   assert.ok(adapter?.includes("Response"));
+});
+
+test('SharedApiPatchService creates ofetch stack under shared/api when ofetch selected', async () => {
+  const context = new GenerationContext({
+    options: {
+      projectName: 'demo',
+      framework: 'react',
+      architecture: 'fsd',
+      httpClient: 'ofetch',
+      validationLibrary: 'zod',
+      styling: 'css',
+      router: 'react-router-dom',
+      tanstackQuery: true,
+      libs: [],
+    },
+    packageManager: 'npm',
+    framework: 'react',
+  });
+
+  const composer = new TsMorphCodeComposer();
+  composer.setBaseFiles(new BaseReactFilesFactory().create(context));
+  await new SharedApiPatchService().apply(context, composer);
+
+  assert.ok(composer.hasFile('src/shared/api/resolveContentType.ts'));
+  assert.ok(composer.hasFile('src/shared/api/errorAdapter.ts'));
+  assert.ok(composer.hasFile('src/shared/api/validation.ts'));
+  assert.ok(composer.hasFile('src/shared/api/baseService.ts'));
+  assert.equal(composer.hasFile('src/shared/api/httpClient.ts'), false);
+  assert.equal(composer.hasFile('src/shared/api/axios.ts'), false);
+
+  const base = composer.getFile('src/shared/api/baseService.ts');
+  assert.ok(base?.includes('from \"ofetch\"') || base?.includes("from 'ofetch'"));
+  assert.ok(base?.includes('resolveContentType'));
+  assert.ok(base?.includes("'Content-Type'") || base?.includes('"Content-Type"'));
+
+  const index = composer.getFile('src/shared/api/index.ts');
+  assert.equal(index?.includes('httpClient'), false);
+  assert.equal(index?.includes('baseAxiosInstance'), false);
+  assert.ok(index?.includes('baseService'));
 });
 
 test("SharedConfigPatchService writes env files and ignore rules at project root", async () => {

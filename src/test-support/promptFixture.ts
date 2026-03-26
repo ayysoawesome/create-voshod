@@ -72,7 +72,7 @@ export function iterateLibPowerset(): AdditionalLibrary[][] {
 }
 
 const MATRIX_FRAMEWORK: Framework = "react";
-const MATRIX_HTTP_CLIENTS: HttpClient[] = ["axios", null];
+const MATRIX_HTTP_CLIENTS: HttpClient[] = ["axios", "ofetch", null];
 
 const MATRIX_ARCHITECTURES: Architecture[] = ["simple", "fsd"];
 const MATRIX_VALIDATION: ValidationLibrary[] = ["zod", null];

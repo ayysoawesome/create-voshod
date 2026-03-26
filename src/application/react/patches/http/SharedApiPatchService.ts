@@ -10,6 +10,7 @@ import { resolveContentTypeSource } from "./codegen/resolveContentType.template.
 import { errorAdapterSource } from "./codegen/errorAdapter.template.js";
 import { errorsCoreSource } from "./codegen/errorsCore.template.js";
 import { fetchBaseServiceSource, fetchHttpClientSource } from "./codegen/fetchStack.template.js";
+import { ofetchBaseServiceSource } from "./codegen/ofetchBaseService.template.js";
 import { queryClientSource } from "./codegen/queryClient.template.js";
 import { retrySource } from "./codegen/retry.template.js";
 import {
@@ -31,6 +32,7 @@ export class SharedApiPatchService implements IReactPatchService {
     const profile = resolveReactLayoutProfile(context.options.value.architecture);
     const root = profile.apiRoot;
     const axiosMode = context.options.value.httpClient === "axios";
+    const ofetchMode = context.options.value.httpClient === "ofetch";
     const useTanStackQuery = context.options.value.tanstackQuery;
     const validationKind = validationCodegenKind(
       context.options.value.validationLibrary,
@@ -42,7 +44,10 @@ export class SharedApiPatchService implements IReactPatchService {
     if (withValidation) {
       composer.upsertFile(`${root}/validation.ts`, validationSource());
     }
-    composer.upsertFile(`${root}/errorAdapter.ts`, errorAdapterSource(axiosMode, validationKind));
+    composer.upsertFile(
+      `${root}/errorAdapter.ts`,
+      errorAdapterSource(axiosMode, validationKind),
+    );
 
     if (useTanStackQuery) {
       composer.upsertFile(`${root}/retry.ts`, retrySource(validationKind));
@@ -52,6 +57,8 @@ export class SharedApiPatchService implements IReactPatchService {
     if (axiosMode) {
       composer.upsertFile(`${root}/axios.ts`, axiosInstanceSource());
       composer.upsertFile(`${root}/baseService.ts`, axiosBaseServiceSource(validationKind));
+    } else if (ofetchMode) {
+      composer.upsertFile(`${root}/baseService.ts`, ofetchBaseServiceSource(validationKind));
     } else {
       composer.upsertFile(`${root}/httpClient.ts`, fetchHttpClientSource());
       composer.upsertFile(`${root}/baseService.ts`, fetchBaseServiceSource(validationKind));
@@ -59,7 +66,7 @@ export class SharedApiPatchService implements IReactPatchService {
 
     composer.upsertFile(
       `${root}/index.ts`,
-      indexApiSource(axiosMode, useTanStackQuery, withValidation),
+      indexApiSource(context.options.value.httpClient, useTanStackQuery, withValidation),
     );
   }
 }

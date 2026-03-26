@@ -41,6 +41,7 @@ export const ARCHITECTURE_CHOICES: Choice<Architecture>[] = [
  */
 export const HTTP_CLIENT_CHOICES: Choice<HttpClient>[] = [
   { title: 'Axios', value: 'axios' },
+  { title: 'ofetch', value: 'ofetch' },
   { title: 'Fetch API', value: null },
 ];
 
