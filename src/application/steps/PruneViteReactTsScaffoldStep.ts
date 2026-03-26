@@ -43,6 +43,14 @@ export class PruneViteReactTsScaffoldStep implements GenerationStep {
       }
     }
 
+    if (context.options.value.formatter === "biome") {
+      try {
+        await fs.remove(path.join(root, "eslint.config.js"));
+      } catch {
+        // ignore missing or locked files
+      }
+    }
+
     if (context.options.value.architecture === "fsd") {
       try {
         await fs.remove(path.join(root, "src", "assets"));

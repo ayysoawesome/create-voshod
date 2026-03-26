@@ -3,6 +3,7 @@ import { CLIOptions } from '@/domain/generation/index.js';
 import {
   ADDITIONAL_LIBRARY_CHOICES,
   ARCHITECTURE_CHOICES,
+  FORMATTER_CHOICES,
   FRAMEWORK_CHOICES,
   HTTP_CLIENT_CHOICES,
   ROUTER_CHOICES,
@@ -86,6 +87,13 @@ export class PromptService {
         name: 'styling',
         message: 'Styling solution',
         choices: STYLING_CHOICES,
+      },
+      {
+        type: 'select',
+        name: 'formatter',
+        message: 'Formatter',
+        choices: FORMATTER_CHOICES,
+        initial: 0,
       },
       {
         type: 'select',

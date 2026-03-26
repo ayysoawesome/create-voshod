@@ -11,6 +11,7 @@ import { BaseReactFilesFactory } from '@/application/react/base-files/index.js';
 import { ReactDependencyPlanner } from '@/application/react/dependency-planning/index.js';
 import {
   ToolchainPatchService,
+  FormatterPatchService,
   SharedConfigPatchService,
   SharedApiPatchService,
   AppProvidersPatchService,
@@ -27,7 +28,6 @@ import {
 import { PackageManagerAdapterFactory } from '@/infrastructure/process/package-managers/index.js';
 import {
   TsMorphCodeComposer,
-  PrettierFormatterService,
 } from '@/infrastructure/codegen/index.js';
 import { FileSystemWriterService } from '@/infrastructure/filesystem/FileSystemWriterService.js';
 import { NodeScaffoldFileReader } from '@/infrastructure/filesystem/NodeScaffoldFileReader.js';
@@ -66,7 +66,7 @@ export class CliApplication {
           adapterFactory,
         ),
         new TsMorphCodeComposer(),
-        new FileSystemWriterService(new PrettierFormatterService()),
+        new FileSystemWriterService(),
         new PackageManagerInstallerService(
           generationContext.packageManager,
           adapterFactory,
@@ -74,6 +74,7 @@ export class CliApplication {
         new BaseReactFilesFactory(),
         [
           new ToolchainPatchService(),
+          new FormatterPatchService(),
           new TailwindPatchService(),
           new CssPatchService(),
           new SharedConfigPatchService(),

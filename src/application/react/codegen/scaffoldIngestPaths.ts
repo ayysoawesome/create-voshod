@@ -3,6 +3,7 @@
  * before zonal patches (see `FileMutationPolicy`).
  */
 export const SCAFFOLD_INGEST_RELATIVE_PATHS = [
+  "package.json",
   "vite.config.ts",
   "tsconfig.app.json",
   "index.html",

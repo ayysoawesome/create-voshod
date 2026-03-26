@@ -1,6 +1,7 @@
 import {
   AdditionalLibrary,
   Architecture,
+  Formatter,
   Framework,
   HttpClient,
   RouterLibrary,
@@ -51,6 +52,14 @@ export const HTTP_CLIENT_CHOICES: Choice<HttpClient>[] = [
 export const STYLING_CHOICES: Choice<Styling>[] = [
   { title: 'TailwindCSS', value: 'tailwind' },
   { title: 'Regular css', value: 'css' },
+];
+
+/**
+ * Formatter choices for CLI prompt.
+ */
+export const FORMATTER_CHOICES: Choice<Formatter>[] = [
+  { title: 'Prettier', value: 'prettier' },
+  { title: 'Biome', value: 'biome' },
 ];
 
 /**

@@ -7,6 +7,7 @@ import { WriteFilesStep } from "../steps/WriteFilesStep.js";
 import { PruneViteReactTsScaffoldStep } from "../steps/PruneViteReactTsScaffoldStep.js";
 import { InstallDependenciesStep } from "../steps/InstallDependenciesStep.js";
 import { PlanDependenciesStep } from "../steps/PlanDependenciesStep.js";
+import { FormatGeneratedProjectStep } from "../steps/FormatGeneratedProjectStep.js";
 import {
   IProjectScaffolder,
   ICodeComposer,
@@ -27,7 +28,8 @@ import { ReactDependencyPlanner } from "../react/dependency-planning/index.js";
  * 3) plan dependencies,
  * 4) write files,
  * 5) prune unused `create-vite` react-ts paths on disk,
- * 6) install dependencies.
+ * 6) install dependencies,
+ * 7) run formatter in generated project.
  */
 export class ReactFrameworkStrategy implements FrameworkStrategy {
   /**
@@ -78,6 +80,7 @@ export class ReactFrameworkStrategy implements FrameworkStrategy {
       new WriteFilesStep(this.fileWriter),
       new PruneViteReactTsScaffoldStep(),
       new InstallDependenciesStep(this.packageInstaller),
+      new FormatGeneratedProjectStep(),
     ];
   }
 }
