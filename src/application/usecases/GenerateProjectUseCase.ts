@@ -2,6 +2,8 @@ import { GenerationContext } from "@/domain/generation/index.js";
 import { ILogger } from "@/domain/ports/index.js";
 import { FrameworkStrategyFactory } from "../strategy/FrameworkStrategyFactory.js";
 
+const REPOSITORY_URL = "https://github.com/ayysoawesome/create-voshod";
+
 /**
  * Executes full project generation lifecycle for selected framework.
  */
@@ -30,6 +32,9 @@ export class GenerateProjectUseCase {
     }
 
     this.logger.success("\n✔ Project created successfully!\n");
+    this.logger.info(
+      `create-voshod is open source (MIT). If it saved you time, we'd appreciate a star on GitHub — it helps others discover the tool:\n${REPOSITORY_URL}\n`,
+    );
   }
 }
 

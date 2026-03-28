@@ -19,6 +19,8 @@
 - Профиль путей FSD/simple: `src/domain/generation/ReactLayoutProfile.ts`
 - Политика зональных правок и ingest: `src/application/react/codegen/FileMutationPolicy.ts`, `scaffoldIngestPaths.ts`
 - Редакторы toolchain (Vite ts-morph, merge tsconfig, HTML): `src/infrastructure/codegen/editors/`, вклады Vite: `src/infrastructure/codegen/vite/`
+- Форматтер (Prettier vs Biome): `src/application/react/patches/toolchain/FormatterPatchService.ts`, после установки зависимостей — `src/application/steps/FormatGeneratedProjectStep.ts`, dev/prod в `ReactDependencyPlanner`
+- Транспорт сгенерированного API: `src/application/react/patches/http/SharedApiPatchService.ts` и шаблоны в `src/application/react/patches/http/codegen/`
 
 ## 2) Добавление новой опции
 
@@ -38,6 +40,27 @@
 
 Опция `validationLibrary: "zod" | null` задаёт рантайм-валидацию для ответов API и env (`SharedApiPatchService`, `SharedConfigPatchService`). Пакет `zod` в `package.json` добавляется только при выборе Zod. Zod **не** задаётся через multiselect `libs` — только через эту опцию.
 
+### HTTP-клиент (`httpClient`)
+
+`httpClient: "axios" | "ofetch" | null` выбирает транспорт для сгенерированного слоя в `apiRoot` из `resolveReactLayoutProfile()` (`SharedApiPatchService`):
+
+- **`axios`** — `axios.ts` и `baseService.ts`; `errorAdapter` учитывает форму ошибок Axios.
+- **`ofetch`** — `baseService.ts` на ofetch (отдельного модуля клиента нет); prod-зависимость `ofetch`.
+- **`null` (Fetch API)** — `httpClient.ts` (обёртка над `fetch`) и `baseService.ts`; без дополнительного HTTP-пакета.
+
+`index.ts` реэкспортирует нужные точки входа в зависимости от режима (включая опционально TanStack Query и файлы валидации). Зависимости: `ReactDependencyPlanner` добавляет prod-зависимость только для `"axios"` или `"ofetch"`.
+
+Подписи в промпте: `promptChoices.ts` (`HTTP_CLIENT_CHOICES`).
+
+### Форматтер (`formatter`)
+
+`formatter: "prettier" | "biome"` настраивает форматирование и скрипты в целевом приложении (`FormatterPatchService`, в `CliApplication` сразу после `ToolchainPatchService`):
+
+- **Prettier** — в `package.json` скрипты `format` и `format:write` (`prettier --write .`), файл `.prettierrc`. `ReactDependencyPlanner` добавляет dev-зависимость `prettier`. Стандартный ESLint-стек шаблона Vite `react-ts` сохраняется.
+- **Biome** — `biome.json`, скрипты `lint` (`biome check .`), `format` / `format:write` (`biome format` / `biome format --write .`), из scaffold-`package.json` убираются devDependencies ESLint, добавляется `@biomejs/biome`. `PruneViteReactTsScaffoldStep` удаляет `eslint.config.js` при выборе Biome.
+
+После `InstallDependenciesStep` шаг `FormatGeneratedProjectStep` запускает в новом проекте `packageManager run format:write` с уже выбранным инструментом.
+
 ### Архитектура генерируемого дерева (`architecture`)
 
 Опция `architecture: "simple" | "fsd"` задаётся через `resolveReactLayoutProfile()` и влияет на entry, стили, API и роутинг:
@@ -45,9 +68,9 @@
 - **`fsd`**: вход `src/app/index.tsx`, стили `src/app/styles`, API `src/shared/api`, config `src/shared/config`, TanStack — дерево `src/app/router`, страницы в `src/pages/...`, импорты в целевом приложении с алиасом `@/*`.
 - **`simple`**: плоское `src/` — вход `src/index.tsx`, стили `src/styles`, API `src/api`, config `src/config`, провайдеры `src/providers`, TanStack — колокейтед `src/router.tsx`, страницы всё равно в `src/pages/...`; пустые каталоги `assets`, `components`, `hooks`, `utils` сидируются через `.gitkeep` в `BaseReactFilesFactory`.
 
-Порядок шагов React-стратегии: scaffold → compose (ingest + патчи) → план зависимостей → запись файлов → **`PruneViteReactTsScaffoldStep`** (удаление лишних файлов шаблона `react-ts` на диске) → установка зависимостей.
+Порядок шагов React-стратегии: scaffold → compose (ingest + патчи) → план зависимостей → запись файлов → **`PruneViteReactTsScaffoldStep`** (удаление лишних файлов шаблона `react-ts` на диске; при Biome ещё удаляется `eslint.config.js`) → установка зависимостей → **`FormatGeneratedProjectStep`** (`format:write` в сгенерированном проекте).
 
-Порядок patch-сервисов в `CliApplication`: toolchain → стили → `SharedConfig` → `SharedApi` → `AppProviders` → роутеры.
+Порядок patch-сервисов в `CliApplication`: toolchain → **`FormatterPatchService`** → стили → `SharedConfig` → `SharedApi` → `AppProviders` → роутеры.
 
 Роутер-патчи **не** меняют entry и **не** импортируют глобальные стили.
 

@@ -109,8 +109,8 @@ export const CLI_MATRIX_COMBINATION_COUNT =
 
 /**
  * Enumerates {@link CliMatrixOptionBundle} rows for the CLI build matrix: react,
- * both HTTP modes (Axios vs Fetch), formatter variants, and all combinations of architecture /
- * validation / styling / router / tanstackQuery, with a fixed
+ * all HTTP modes (`axios`, `ofetch`, Fetch/`null`), both formatter presets, and all
+ * combinations of architecture / validation / styling / router / tanstackQuery, with a fixed
  * {@link CLI_MATRIX_LIBS_FOR_BUILD} `libs` list.
  */
 export function enumerateCliMatrixOptionBundles(): CliMatrixOptionBundle[] {

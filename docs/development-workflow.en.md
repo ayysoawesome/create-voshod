@@ -19,6 +19,8 @@ Main extension points:
 - FSD vs simple path profile: `src/domain/generation/ReactLayoutProfile.ts`
 - Zonal mutation policy + scaffold ingest: `src/application/react/codegen/FileMutationPolicy.ts`, `scaffoldIngestPaths.ts`
 - Toolchain editors (Vite via ts-morph, tsconfig merge, HTML): `src/infrastructure/codegen/editors/`, Vite contributions: `src/infrastructure/codegen/vite/`
+- Formatter (Prettier vs Biome): `src/application/react/patches/toolchain/FormatterPatchService.ts`, post-install `src/application/steps/FormatGeneratedProjectStep.ts`, deps in `ReactDependencyPlanner`
+- Generated API transport: `src/application/react/patches/http/SharedApiPatchService.ts` and templates under `src/application/react/patches/http/codegen/`
 
 ## 2) Add a new option
 
@@ -38,6 +40,27 @@ Example: add a new option axis like `stateManager`.
 
 `validationLibrary: "zod" | null` controls runtime validation for API responses and env (`SharedApiPatchService`, `SharedConfigPatchService`). The `zod` package is added only when Zod is selected. Zod is **not** chosen via the `libs` multiselect—only via this option.
 
+### HTTP client (`httpClient`)
+
+`httpClient: "axios" | "ofetch" | null` selects the transport for the generated stack under `resolveReactLayoutProfile()`’s `apiRoot` (`SharedApiPatchService`):
+
+- **`axios`** — `axios.ts` instance + `baseService.ts`; `errorAdapter` uses Axios error shapes.
+- **`ofetch`** — `baseService.ts` built on ofetch (no separate client module); prod dependency `ofetch`.
+- **`null` (Fetch API)** — `httpClient.ts` (thin wrapper around `fetch`) + `baseService.ts`; no extra HTTP package.
+
+`index.ts` re-exports the right entry points per mode (including optional TanStack Query and validation files). Dependency wiring: `ReactDependencyPlanner` adds a prod dependency only for `"axios"` or `"ofetch"`.
+
+Prompt labels: `promptChoices.ts` (`HTTP_CLIENT_CHOICES`).
+
+### Formatter (`formatter`)
+
+`formatter: "prettier" | "biome"` configures formatting and related scripts in the generated app (`FormatterPatchService`, registered right after `ToolchainPatchService` in `CliApplication`):
+
+- **Prettier** — ensures `package.json` scripts `format` and `format:write` run `prettier --write .`; writes `.prettierrc`. `ReactDependencyPlanner` adds dev dependency `prettier`. The default Vite `react-ts` ESLint setup is left as-is.
+- **Biome** — writes `biome.json`, sets scripts `lint` (`biome check .`), `format` / `format:write` (`biome format` / `biome format --write .`), strips ESLint-related `devDependencies` from the scaffolded `package.json`, and adds `@biomejs/biome`. `PruneViteReactTsScaffoldStep` removes `eslint.config.js` when Biome is selected.
+
+After `InstallDependenciesStep`, `FormatGeneratedProjectStep` runs `packageManager run format:write` in the new project so the tree is formatted with whichever tool was configured.
+
 ### Generated tree layout (`architecture`)
 
 `architecture: "simple" | "fsd"` is resolved via `resolveReactLayoutProfile()` and drives entry, styles, API, and routing:
@@ -45,9 +68,9 @@ Example: add a new option axis like `stateManager`.
 - **`fsd`**: entry `src/app/index.tsx`, styles `src/app/styles`, API `src/shared/api`, config `src/shared/config`, TanStack uses `src/app/router/*`, pages under `src/pages/...`, generated app code uses `@/*` (Vite + tsconfig patched by `ToolchainPatchService`).
 - **`simple`**: flat `src/` — entry `src/index.tsx`, styles `src/styles`, API `src/api`, config `src/config`, providers `src/providers`, TanStack uses colocated `src/router.tsx`, pages still under `src/pages/...`; empty `assets`, `components`, `hooks`, and `utils` dirs are seeded with `.gitkeep` in `BaseReactFilesFactory`.
 
-React strategy step order: scaffold → compose (ingest + patches) → plan dependencies → write files → **`PruneViteReactTsScaffoldStep`** (removes unused on-disk `react-ts` template files) → install dependencies.
+React strategy step order: scaffold → compose (ingest + patches) → plan dependencies → write files → **`PruneViteReactTsScaffoldStep`** (removes unused on-disk `react-ts` template files; also drops `eslint.config.js` when Biome is selected) → install dependencies → **`FormatGeneratedProjectStep`** (`format:write` in the generated project).
 
-Patch order in `CliApplication`: toolchain → styling → `SharedConfig` → `SharedApi` → `AppProviders` → router patches.
+Patch order in `CliApplication`: toolchain → **`FormatterPatchService`** → styling → `SharedConfig` → `SharedApi` → `AppProviders` → router patches.
 
 Router patches must **not** change the HTML entry or import global styles.
 

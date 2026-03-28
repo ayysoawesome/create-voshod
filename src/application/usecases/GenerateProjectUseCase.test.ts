@@ -7,7 +7,10 @@ import { GenerationContext } from "@/domain/generation/index.js";
 
 class FakeLogger {
   public successMessages: string[] = [];
-  info(): void {}
+  public infoMessages: string[] = [];
+  info(message: string): void {
+    this.infoMessages.push(message);
+  }
   error(): void {}
   success(message: string): void {
     this.successMessages.push(message);
@@ -56,5 +59,7 @@ test("GenerateProjectUseCase executes strategy steps", async () => {
   await useCase.execute(context);
   assert.equal(marker.executed, 1);
   assert.equal(logger.successMessages.length, 1);
+  assert.equal(logger.infoMessages.length, 1);
+  assert.ok(logger.infoMessages[0]?.includes("github.com/ayysoawesome/create-voshod"));
 });
 
