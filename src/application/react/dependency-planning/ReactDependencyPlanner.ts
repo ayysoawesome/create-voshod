@@ -1,7 +1,12 @@
+import {
+  resolveAdditionalLibNpm,
+  routerNpmPackage,
+  tanstackQueryNpmPackage,
+} from "@/domain/generation/frameworkCapabilityCatalog.js";
 import { GenerationContext } from "@/domain/generation/index.js";
 
 /**
- * Plans production dependencies for generated React projects.
+ * Plans production and dev dependencies for generated projects from CLI options.
  */
 export class ReactDependencyPlanner {
   /**
@@ -18,20 +23,42 @@ export class ReactDependencyPlanner {
       context.runtime.addDevDependency("@biomejs/biome");
     }
 
-    if (context.options.value.tanstackQuery) {
-      context.runtime.addProdDependency("@tanstack/react-query");
+    if (context.options.value.asyncState === "tanstack-query") {
+      context.runtime.addProdDependency(
+        tanstackQueryNpmPackage(context.options.value.framework),
+      );
+    }
+
+    if (context.options.value.clientState === "zustand") {
+      context.runtime.addProdDependency("zustand");
+    }
+
+    if (context.options.value.clientState === "pinia") {
+      context.runtime.addProdDependency("pinia");
+    }
+
+    if (context.options.value.asyncState === "pinia-colada") {
+      context.runtime.addProdDependency("@pinia/colada");
+      if (context.options.value.clientState !== "pinia") {
+        context.runtime.addProdDependency("pinia");
+      }
     }
 
     if (context.options.value.validationLibrary === "zod") {
       context.runtime.addProdDependency("zod");
     }
 
+    const fw = context.options.value.framework;
     for (const lib of context.options.value.libs) {
-      context.runtime.addProdDependency(lib);
+      const pkg = resolveAdditionalLibNpm(lib, fw);
+      if (pkg !== null) {
+        context.runtime.addProdDependency(pkg);
+      }
     }
 
-    if (context.options.value.router) {
-      context.runtime.addProdDependency(context.options.value.router);
+    const routerPkg = routerNpmPackage(context.options.value.router);
+    if (routerPkg !== null) {
+      context.runtime.addProdDependency(routerPkg);
     }
 
     if (context.options.value.httpClient) {
@@ -44,4 +71,3 @@ export class ReactDependencyPlanner {
     }
   }
 }
-

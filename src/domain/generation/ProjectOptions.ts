@@ -20,23 +20,31 @@ export type Formatter = 'prettier' | 'biome';
  */
 export type HttpClient = 'axios' | 'ofetch' | null;
 /**
- * Supported router options.
+ * Supported router options (npm package id when a library is selected).
  */
 export type RouterLibrary =
   | '@tanstack/react-router'
   | 'react-router-dom'
+  | 'vue-router'
   | null;
 /**
  * Runtime validation for API responses and env; `null` means no validation library.
  */
 export type ValidationLibrary = 'zod' | null;
 /**
- * Optional additional libraries selectable in prompt flow.
+ * Client-side global state library; `null` means none. Valid values depend on {@link Framework}.
+ */
+export type ClientState = 'zustand' | 'pinia' | null;
+/**
+ * Async / server-state layer for data fetching; `null` means none. Valid values depend on {@link Framework}.
+ */
+export type AsyncState = 'tanstack-query' | 'pinia-colada' | null;
+/**
+ * Logical ids for optional multiselect libraries; npm package per framework via capability catalog.
  */
 export type AdditionalLibrary =
-  | 'zustand'
-  | '@tanstack/react-table'
-  | '@tanstack/react-form'
+  | 'tanstack-table'
+  | 'tanstack-react-form'
   | 'react-hook-form';
 
 /**
@@ -59,8 +67,10 @@ export interface ProjectOptions {
   validationLibrary: ValidationLibrary;
   /** Router library to wire in; `null` means no router. */
   router: RouterLibrary;
-  /** When true, adds `@tanstack/react-query`, `queryClient`, and `QueryClientProvider` in providers. */
-  tanstackQuery: boolean;
+  /** Global client state (Zustand on React, Pinia on Vue); `null` means none. */
+  clientState: ClientState;
+  /** Async data layer (TanStack Query, or Pinia Colada on Vue); `null` means none. */
+  asyncState: AsyncState;
   /** Extra npm packages selected in the multiselect prompt. */
   libs: AdditionalLibrary[];
 }

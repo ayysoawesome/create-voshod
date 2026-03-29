@@ -17,14 +17,14 @@ export class ViteProjectScaffolderService implements IProjectScaffolder {
   ) {}
 
   /**
-   * Executes project scaffold command (always `react-ts` Vite template).
+   * Executes project scaffold command (`react-ts` or `vue-ts` from Vite).
    *
    * @param context Runtime generation context.
    * @returns Promise resolved when scaffold command completes.
    */
   async scaffold(context: GenerationContext): Promise<void> {
     const adapter = this.adapterFactory.create(this.packageManager);
-    const template = "react-ts";
+    const template = context.framework === "vue" ? "vue-ts" : "react-ts";
     await execa(
       this.packageManager,
       adapter.createProjectArgs(context.options.value.projectName, template),

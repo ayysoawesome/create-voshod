@@ -26,7 +26,7 @@ npm pack
 
 For a **full pre-release check** of every interactive CLI combination (scaffold + `npm install` + `npm run build` per combination), run the matrix separately — it is slow (network-heavy) and is **not** part of `npm test`.
 
-With the current prompt set (React-only; HTTP: Axios, ofetch, or Fetch; formatter: Prettier or Biome), the full **build** matrix is **288** combinations (architecture × `httpClient` × validation × styling × formatter × router × TanStack Query). The multiselect for extra npm packages is **not** expanded: those choices only affect `package.json` dependencies, not generated source, so separate installs/builds per subset are skipped.
+With the current prompt set (React and Vue; HTTP: Axios, ofetch, or Fetch; formatter: Prettier or Biome), the full **build** matrix is **2304** combinations: each of React (3 router choices) and Vue (2 router choices) is crossed with architecture × `httpClient` × validation × styling × formatter × client state manager × async/server state. React expands client state (2) × async state (2); Vue expands client state (2) × async state (3). The multiselect for extra npm packages is **not** expanded: those choices only affect `package.json` dependencies, not generated source, so separate installs/builds per subset are skipped.
 
 ```bash
 npm run test:cli:matrix

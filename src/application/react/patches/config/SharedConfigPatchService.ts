@@ -2,6 +2,7 @@ import { IReactPatchService } from "../../../patches/IReactPatchService.js";
 import {
   GenerationContext,
   resolveReactLayoutProfile,
+  resolveVueLayoutProfile,
 } from "@/domain/generation/index.js";
 import { ICodeComposer } from "@/domain/ports/index.js";
 
@@ -10,11 +11,14 @@ import { ICodeComposer } from "@/domain/ports/index.js";
  */
 export class SharedConfigPatchService implements IReactPatchService {
   supports(context: GenerationContext): boolean {
-    return context.framework === "react";
+    return context.framework === "react" || context.framework === "vue";
   }
 
   async apply(context: GenerationContext, composer: ICodeComposer): Promise<void> {
-    const profile = resolveReactLayoutProfile(context.options.value.architecture);
+    const profile =
+      context.framework === "vue"
+        ? resolveVueLayoutProfile(context.options.value.architecture)
+        : resolveReactLayoutProfile(context.options.value.architecture);
     const useZod = context.options.value.validationLibrary === "zod";
     const root = profile.configRoot;
 

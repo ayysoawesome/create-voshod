@@ -4,10 +4,16 @@ import { CliErrorPresenter } from './CliErrorPresenter.js';
 import {
   FrameworkStrategyFactory,
   ReactFrameworkStrategy,
+  VueFrameworkStrategy,
 } from '@/application/strategy/index.js';
 import { GenerateProjectUseCase } from '@/application/usecases/GenerateProjectUseCase.js';
 import { GenerationContextFactory } from '@/application/factories/GenerationContextFactory.js';
 import { BaseReactFilesFactory } from '@/application/react/base-files/index.js';
+import { BaseVueFilesFactory } from '@/application/vue/base-files/index.js';
+import {
+  VueToolchainPatchService,
+  VueAppIntegrationPatchService,
+} from '@/application/vue/patches/index.js';
 import { ReactDependencyPlanner } from '@/application/react/dependency-planning/index.js';
 import {
   ToolchainPatchService,
@@ -60,17 +66,24 @@ export class CliApplication {
       const generationContext = this.generationContextFactory.create(options);
 
       const adapterFactory = new PackageManagerAdapterFactory();
-      const strategy = new ReactFrameworkStrategy(
-        new ViteProjectScaffolderService(
-          generationContext.packageManager,
-          adapterFactory,
-        ),
-        new TsMorphCodeComposer(),
-        new FileSystemWriterService(),
-        new PackageManagerInstallerService(
-          generationContext.packageManager,
-          adapterFactory,
-        ),
+      const scaffolder = new ViteProjectScaffolderService(
+        generationContext.packageManager,
+        adapterFactory,
+      );
+      const codeComposer = new TsMorphCodeComposer();
+      const fileWriter = new FileSystemWriterService();
+      const packageInstaller = new PackageManagerInstallerService(
+        generationContext.packageManager,
+        adapterFactory,
+      );
+      const scaffoldReader = new NodeScaffoldFileReader();
+      const dependencyPlanner = new ReactDependencyPlanner();
+
+      const reactStrategy = new ReactFrameworkStrategy(
+        scaffolder,
+        codeComposer,
+        fileWriter,
+        packageInstaller,
         new BaseReactFilesFactory(),
         [
           new ToolchainPatchService(),
@@ -83,11 +96,33 @@ export class CliApplication {
           new ReactRouterDomPatchService(),
           new TanstackRouterPatchService(),
         ],
-        new ReactDependencyPlanner(),
-        new NodeScaffoldFileReader(),
+        dependencyPlanner,
+        scaffoldReader,
       );
 
-      const strategyFactory = new FrameworkStrategyFactory([strategy]);
+      const vueStrategy = new VueFrameworkStrategy(
+        scaffolder,
+        codeComposer,
+        fileWriter,
+        packageInstaller,
+        new BaseVueFilesFactory(),
+        [
+          new VueToolchainPatchService(),
+          new FormatterPatchService(),
+          new TailwindPatchService(),
+          new CssPatchService(),
+          new SharedConfigPatchService(),
+          new SharedApiPatchService(),
+          new VueAppIntegrationPatchService(),
+        ],
+        dependencyPlanner,
+        scaffoldReader,
+      );
+
+      const strategyFactory = new FrameworkStrategyFactory([
+        reactStrategy,
+        vueStrategy,
+      ]);
       const useCase = new GenerateProjectUseCase(strategyFactory, this.logger);
       await useCase.execute(generationContext);
     } catch (error) {

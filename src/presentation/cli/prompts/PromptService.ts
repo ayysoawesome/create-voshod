@@ -1,12 +1,17 @@
 import prompts from 'prompts';
-import { CLIOptions } from '@/domain/generation/index.js';
 import {
-  ADDITIONAL_LIBRARY_CHOICES,
+  CLIOptions,
+  type Framework,
+} from '@/domain/generation/index.js';
+import {
   ARCHITECTURE_CHOICES,
   FORMATTER_CHOICES,
   FRAMEWORK_CHOICES,
+  getAdditionalLibraryChoices,
+  getAsyncStateChoices,
+  getClientStateChoices,
+  getRouterChoices,
   HTTP_CLIENT_CHOICES,
-  ROUTER_CHOICES,
   STYLING_CHOICES,
   VALIDATION_LIBRARY_CHOICES,
 } from './promptChoices.js';
@@ -50,7 +55,7 @@ export class PromptService {
       prompts.inject(parseInjectedAnswers(injectedFixture));
     }
 
-    return prompts<keyof CLIOptions>([
+    const first = await prompts([
       {
         type: 'text',
         name: 'projectName',
@@ -64,6 +69,11 @@ export class PromptService {
         message: 'Framework',
         choices: FRAMEWORK_CHOICES,
       },
+    ]);
+
+    const framework = first.framework as Framework;
+
+    const second = await prompts([
       {
         type: 'select',
         name: 'architecture',
@@ -99,20 +109,43 @@ export class PromptService {
         type: 'select',
         name: 'router',
         message: 'Router library',
-        choices: ROUTER_CHOICES,
+        choices: getRouterChoices(framework),
       },
       {
-        type: 'confirm',
-        name: 'tanstackQuery',
-        message: 'Use TanStack Query (@tanstack/react-query)?',
-        initial: true,
+        type: 'select',
+        name: 'clientState',
+        message: 'Client state manager',
+        choices: getClientStateChoices(framework),
+      },
+      {
+        type: 'select',
+        name: 'asyncState',
+        message: 'Async / server state (data fetching)',
+        choices: getAsyncStateChoices(framework),
       },
       {
         type: 'multiselect',
         name: 'libs',
         message: 'Additional libraries',
-        choices: ADDITIONAL_LIBRARY_CHOICES,
+        choices: getAdditionalLibraryChoices(framework),
       },
     ]);
+
+    const libsRaw = second.libs;
+    const libs = Array.isArray(libsRaw) ? libsRaw : [];
+
+    return {
+      projectName: String(first.projectName ?? '').trim(),
+      framework,
+      architecture: second.architecture as CLIOptions['architecture'],
+      httpClient: second.httpClient as CLIOptions['httpClient'],
+      validationLibrary: second.validationLibrary as CLIOptions['validationLibrary'],
+      styling: second.styling as CLIOptions['styling'],
+      formatter: second.formatter as CLIOptions['formatter'],
+      router: second.router as CLIOptions['router'],
+      clientState: second.clientState as CLIOptions['clientState'],
+      asyncState: second.asyncState as CLIOptions['asyncState'],
+      libs: libs as CLIOptions['libs'],
+    };
   }
 }

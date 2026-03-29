@@ -4,4 +4,5 @@
 export * from "./FrameworkStrategy.js";
 export * from "./FrameworkStrategyFactory.js";
 export * from "./ReactFrameworkStrategy.js";
+export * from "./VueFrameworkStrategy.js";
 

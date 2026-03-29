@@ -19,7 +19,7 @@ export class AppProvidersPatchService implements IReactPatchService {
     const profile = resolveReactLayoutProfile(context.options.value.architecture);
     const api = apiImportBase(profile);
     const pDir = profile.providersDirectory;
-    const useQuery = context.options.value.tanstackQuery;
+    const useQuery = context.options.value.asyncState === "tanstack-query";
 
     const appProvidersSource = useQuery
       ? `import { type FC, type ReactNode } from "react";

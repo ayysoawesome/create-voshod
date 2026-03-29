@@ -26,15 +26,16 @@ Follow the prompts: project name, stack options, and optional libraries. A new d
 
 ## Available options
 
-- **Framework:** **React** (Vite + TypeScript) in the current CLI; the generator is structured so additional frameworks can be added to the same prompt flow.
+- **Framework:** **React** or **Vue** (Vite + TypeScript + `vue-ts` / `react-ts` scaffolds); the generator is structured so additional frameworks can follow the same prompt flow.
 - **Architecture:** **Simple** (flat `src/`) or **FSD** (Feature-Sliced style layout).
 - **HTTP client:** **Axios**, **ofetch**, or **Fetch API** (built-in `fetch` via a small `httpClient` wrapper — no extra HTTP dependency). All modes share the same API layer shape (errors, `baseService`, optional TanStack Query helpers).
 - **Formatter:** **Prettier** (default ESLint stack from the Vite template + Prettier scripts and `.prettierrc`) or **Biome** (`biome.json`, `lint` / `format` scripts, ESLint devDependencies removed from the scaffold, `eslint.config.js` pruned after write).
 - **Validation:** **Zod** for API/env parsing, or **none** (no Zod in generated code).
 - **Styling:** **Tailwind CSS** or **plain CSS**.
-- **Router:** **React Router**, **TanStack Router**, or **no router**.
-- **TanStack Query:** optional (`QueryClient` + provider wiring when enabled).
-- **Optional libraries** (multiselect): Zustand, TanStack Table, React Hook Form (see current prompt list when you run the CLI).
+- **Router:** **React Router** or **TanStack Router** (React), **Vue Router** (Vue), or **no router**.
+- **Client state manager:** **Zustand** (React), **Pinia** (Vue), or **none**.
+- **Async / server state:** **TanStack Query** (`QueryClient` + provider wiring), or on Vue **Pinia Colada** instead, or **none**.
+- **Optional libraries** (multiselect): TanStack Table, TanStack Form, React Hook Form (see current prompt list when you run the CLI).
 
 Generated projects use the `@/*` path alias (Vite + TypeScript) where the template applies.
 

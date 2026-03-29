@@ -1,5 +1,7 @@
-export function queryClientSource(): string {
-  return `import { QueryClient } from "@tanstack/react-query";
+export function queryClientSource(framework: "react" | "vue"): string {
+  const pkg =
+    framework === "vue" ? "@tanstack/vue-query" : "@tanstack/react-query";
+  return `import { QueryClient } from "${pkg}";
 import { shouldRetryApiError } from "./retry";
 
 export const queryClient = new QueryClient({

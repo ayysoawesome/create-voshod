@@ -26,7 +26,8 @@ test("FrameworkStrategyFactory returns matching strategy", () => {
       styling: "css",
       formatter: "prettier",
       router: "react-router-dom",
-      tanstackQuery: true,
+      clientState: null,
+      asyncState: "tanstack-query",
       libs: [],
     },
     packageManager: "npm",
@@ -37,8 +38,11 @@ test("FrameworkStrategyFactory returns matching strategy", () => {
   assert.ok(strategy.supports("react"));
 });
 
-test("FrameworkStrategyFactory throws on missing strategy", () => {
-  const factory = new FrameworkStrategyFactory([new FakeStrategy("react")]);
+test("FrameworkStrategyFactory resolves vue when registered", () => {
+  const factory = new FrameworkStrategyFactory([
+    new FakeStrategy("react"),
+    new FakeStrategy("vue"),
+  ]);
   const context = new GenerationContext({
     options: {
       projectName: "demo",
@@ -48,12 +52,37 @@ test("FrameworkStrategyFactory throws on missing strategy", () => {
       validationLibrary: "zod",
       styling: "css",
       formatter: "prettier",
-      router: "react-router-dom",
-      tanstackQuery: true,
+      router: "vue-router",
+      clientState: null,
+      asyncState: "tanstack-query",
       libs: [],
     },
     packageManager: "npm",
     framework: "vue",
+  });
+
+  const strategy = factory.create(context);
+  assert.ok(strategy.supports("vue"));
+});
+
+test("FrameworkStrategyFactory throws on missing strategy", () => {
+  const factory = new FrameworkStrategyFactory([new FakeStrategy("react")]);
+  const context = new GenerationContext({
+    options: {
+      projectName: "demo",
+      framework: "nextjs",
+      architecture: "fsd",
+      httpClient: "axios",
+      validationLibrary: "zod",
+      styling: "css",
+      formatter: "prettier",
+      router: null,
+      clientState: null,
+      asyncState: null,
+      libs: [],
+    },
+    packageManager: "npm",
+    framework: "nextjs",
   });
 
   assert.throws(() => factory.create(context));

@@ -1,4 +1,3 @@
-import type { ReactLayoutProfile } from "@/domain/generation/index.js";
 import type { ICodeComposer } from "@/domain/ports/index.js";
 import type { Styling } from "@/domain/generation/ProjectOptions.js";
 
@@ -12,7 +11,7 @@ import type { Styling } from "@/domain/generation/ProjectOptions.js";
  */
 export function writeAppStyleTree(
   composer: ICodeComposer,
-  profile: ReactLayoutProfile,
+  profile: { stylesDirectory: string },
   styling: Styling,
 ): void {
   const base = profile.stylesDirectory;

@@ -108,7 +108,7 @@ When extending generated UI, cover both branches (`RouterPatches.architecture.te
 Example: add `react-i18next`.
 
 1. Add library value to `AdditionalLibrary` in `src/domain/generation/ProjectOptions.ts`.
-2. Add it to `ADDITIONAL_LIBRARY_CHOICES` in `src/presentation/cli/prompts/promptChoices.ts`.
+2. Register the logical id in `src/domain/generation/frameworkCapabilityCatalog.ts` (npm per framework) and add a title in `getAdditionalLibraryChoices` / `ADDITIONAL_LIB_TITLES` in `src/presentation/cli/prompts/promptChoices.ts` (and extend `AdditionalLibrary` in `ProjectOptions.ts` if needed).
 3. Ensure dependency planning:
    - if library can be installed directly from selected `libs`, planner already covers it;
    - if extra paired dependencies are needed, add conditional logic in `ReactDependencyPlanner`.

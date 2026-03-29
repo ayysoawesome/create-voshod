@@ -14,7 +14,8 @@ const createOptions = (projectName: string): CLIOptions => ({
   httpClient: null,
   validationLibrary: "zod",
   router: "react-router-dom",
-  tanstackQuery: true,
+  clientState: null,
+  asyncState: "tanstack-query",
   libs: [],
 });
 
@@ -37,5 +38,36 @@ test("GenerationContextFactory rejects empty project name", () => {
     (error: unknown) =>
       error instanceof ValidationError &&
       error.message === "Project name is required.",
+  );
+});
+
+test("GenerationContextFactory rejects React router for Vue", () => {
+  const factory = new GenerationContextFactory(detectorStub);
+  assert.throws(
+    () =>
+      factory.create({
+        ...createOptions("demo"),
+        framework: "vue",
+        router: "react-router-dom",
+      }),
+    (error: unknown) =>
+      error instanceof ValidationError &&
+      error.message.includes("Router selection is invalid"),
+  );
+});
+
+test("GenerationContextFactory rejects unsupported lib for framework", () => {
+  const factory = new GenerationContextFactory(detectorStub);
+  assert.throws(
+    () =>
+      factory.create({
+        ...createOptions("demo"),
+        framework: "vue",
+        router: null,
+        libs: ["tanstack-react-form"],
+      }),
+    (error: unknown) =>
+      error instanceof ValidationError &&
+      error.message.includes("not available for framework"),
   );
 });

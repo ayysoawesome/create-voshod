@@ -31,7 +31,8 @@ type BundleLogShape = {
   validationLibrary: CliMatrixOptionBundle["validationLibrary"];
   styling: CliMatrixOptionBundle["styling"];
   router: CliMatrixOptionBundle["router"];
-  tanstackQuery: boolean;
+  clientState: CliMatrixOptionBundle["clientState"];
+  asyncState: CliMatrixOptionBundle["asyncState"];
   libs: CliMatrixOptionBundle["libs"];
 };
 
@@ -144,7 +145,8 @@ function bundleToLogShape(bundle: CliMatrixOptionBundle): BundleLogShape {
     validationLibrary: bundle.validationLibrary,
     styling: bundle.styling,
     router: bundle.router,
-    tanstackQuery: bundle.tanstackQuery,
+    clientState: bundle.clientState,
+    asyncState: bundle.asyncState,
     libs: bundle.libs,
   };
 }

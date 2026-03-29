@@ -1,4 +1,4 @@
-import type { ReactLayoutProfile } from "@/domain/generation/ReactLayoutProfile.js";
+import type { Architecture } from "@/domain/generation/ProjectOptions.js";
 import { parse, printParseErrorCode, type ParseError } from "jsonc-parser";
 
 export class TsConfigJsonParseError extends Error {
@@ -16,11 +16,11 @@ type TsConfigJson = {
   [key: string]: unknown;
 };
 
-function pathsToMergeForProfile(profile: ReactLayoutProfile): Record<string, string[]> {
+function pathsToMergeForArchitecture(architecture: Architecture): Record<string, string[]> {
   const base = {
     "@/*": ["./src/*"],
   };
-  if (profile.architecture === "fsd") {
+  if (architecture === "fsd") {
     return {
       ...base,
       "@icons/*": ["./src/shared/assets/icons/*"],
@@ -61,11 +61,14 @@ function parseTsConfigDocument(raw: string): TsConfigJson {
  * Merges `compilerOptions.paths` into an existing `tsconfig.app.json` body without dropping other keys.
  * Accepts JSONC as produced by current Vite templates (comments, trailing commas).
  */
-export function mergeTsConfigAppPaths(rawJson: string, profile: ReactLayoutProfile): string {
+export function mergeTsConfigAppPaths(
+  rawJson: string,
+  profile: { architecture: Architecture },
+): string {
   const parsed = parseTsConfigDocument(rawJson);
   const nextPaths = {
     ...(parsed.compilerOptions?.paths ?? {}),
-    ...pathsToMergeForProfile(profile),
+    ...pathsToMergeForArchitecture(profile.architecture),
   };
   const compilerOptions = {
     ...(parsed.compilerOptions ?? {}),

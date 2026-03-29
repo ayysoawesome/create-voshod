@@ -2,6 +2,7 @@ import { IReactPatchService } from "../../../patches/IReactPatchService.js";
 import {
   GenerationContext,
   resolveReactLayoutProfile,
+  resolveVueLayoutProfile,
 } from "@/domain/generation/index.js";
 import { ICodeComposer } from "@/domain/ports/index.js";
 import { indexApiSource } from "./codegen/apiIndex.template.js";
@@ -25,15 +26,19 @@ import { validationSource } from "./codegen/validation.template.js";
  */
 export class SharedApiPatchService implements IReactPatchService {
   supports(context: GenerationContext): boolean {
-    return context.framework === "react";
+    return context.framework === "react" || context.framework === "vue";
   }
 
   async apply(context: GenerationContext, composer: ICodeComposer): Promise<void> {
-    const profile = resolveReactLayoutProfile(context.options.value.architecture);
+    const profile =
+      context.framework === "vue"
+        ? resolveVueLayoutProfile(context.options.value.architecture)
+        : resolveReactLayoutProfile(context.options.value.architecture);
     const root = profile.apiRoot;
     const axiosMode = context.options.value.httpClient === "axios";
     const ofetchMode = context.options.value.httpClient === "ofetch";
-    const useTanStackQuery = context.options.value.tanstackQuery;
+    const useTanStackQuery =
+      context.options.value.asyncState === "tanstack-query";
     const validationKind = validationCodegenKind(
       context.options.value.validationLibrary,
     );
@@ -51,7 +56,10 @@ export class SharedApiPatchService implements IReactPatchService {
 
     if (useTanStackQuery) {
       composer.upsertFile(`${root}/retry.ts`, retrySource(validationKind));
-      composer.upsertFile(`${root}/queryClient.ts`, queryClientSource());
+      composer.upsertFile(
+        `${root}/queryClient.ts`,
+        queryClientSource(context.framework === "vue" ? "vue" : "react"),
+      );
     }
 
     if (axiosMode) {

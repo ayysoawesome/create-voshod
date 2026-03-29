@@ -1,7 +1,9 @@
 import type {
   AdditionalLibrary,
   Architecture,
+  AsyncState,
   CLIOptions,
+  ClientState,
   Formatter,
   Framework,
   HttpClient,
@@ -9,14 +11,15 @@ import type {
   Styling,
   ValidationLibrary,
 } from "@/domain/generation/index.js";
-import { ADDITIONAL_LIBRARY_CHOICES } from "@/presentation/cli/prompts/promptChoices.js";
+import { ALL_ADDITIONAL_LIBRARY_IDS } from "@/domain/generation/frameworkCapabilityCatalog.js";
 
 /**
  * Ordered list of additional-library prompt values (used by {@link iterateLibPowerset};
  * the build matrix uses {@link CLI_MATRIX_LIBS_FOR_BUILD} instead of expanding subsets).
  */
-export const CLI_MATRIX_LIB_ORDER: readonly AdditionalLibrary[] =
-  ADDITIONAL_LIBRARY_CHOICES.map((choice) => choice.value);
+export const CLI_MATRIX_LIB_ORDER: readonly AdditionalLibrary[] = [
+  ...ALL_ADDITIONAL_LIBRARY_IDS,
+];
 
 /**
  * All prompt answers except `projectName`, matching current interactive CLI domains.
@@ -25,7 +28,7 @@ export type CliMatrixOptionBundle = Omit<CLIOptions, "projectName">;
 
 /**
  * Builds the JSON array passed to `prompts.inject`, in the same order as
- * {@link PromptService.askOptions} in `PromptService.ts`.
+ * {@link PromptService.askOptions} in `PromptService.ts` (two sequential prompt batches).
  *
  * @param options Full CLI options including `projectName`.
  * @returns Serializable array for `VOSHOD_PROMPT_FIXTURE_JSON`.
@@ -40,7 +43,8 @@ export function cliOptionsToInjectedAnswers(options: CLIOptions): unknown[] {
     options.styling,
     options.formatter,
     options.router,
-    options.tanstackQuery,
+    options.clientState,
+    options.asyncState,
     options.libs,
   ];
 }
@@ -73,19 +77,51 @@ export function iterateLibPowerset(): AdditionalLibrary[][] {
   return result;
 }
 
-const MATRIX_FRAMEWORK: Framework = "react";
+const MATRIX_FRAMEWORKS: Framework[] = ["react", "vue"];
 const MATRIX_HTTP_CLIENTS: HttpClient[] = ["axios", "ofetch", null];
 
 const MATRIX_ARCHITECTURES: Architecture[] = ["simple", "fsd"];
 const MATRIX_VALIDATION: ValidationLibrary[] = ["zod", null];
 const MATRIX_STYLING: Styling[] = ["tailwind", "css"];
 const MATRIX_FORMATTERS: Formatter[] = ["prettier", "biome"];
-const MATRIX_ROUTERS: RouterLibrary[] = [
+const MATRIX_ROUTERS_REACT: RouterLibrary[] = [
   "react-router-dom",
   "@tanstack/react-router",
   null,
 ];
-const MATRIX_QUERY: boolean[] = [true, false];
+const MATRIX_ROUTERS_VUE: RouterLibrary[] = ["vue-router", null];
+
+function routersForFramework(framework: Framework): readonly RouterLibrary[] {
+  return framework === "vue" ? MATRIX_ROUTERS_VUE : MATRIX_ROUTERS_REACT;
+}
+
+/**
+ * Cartesian product of client × async state choices per framework (matches CLI selects).
+ */
+function clientAsyncPairsForFramework(
+  framework: Framework,
+): readonly { clientState: ClientState; asyncState: AsyncState }[] {
+  if (framework === "react") {
+    const clients: ClientState[] = [null, "zustand"];
+    const asyncs: AsyncState[] = [null, "tanstack-query"];
+    const pairs: { clientState: ClientState; asyncState: AsyncState }[] = [];
+    for (const clientState of clients) {
+      for (const asyncState of asyncs) {
+        pairs.push({ clientState, asyncState });
+      }
+    }
+    return pairs;
+  }
+  const clients: ClientState[] = [null, "pinia"];
+  const asyncs: AsyncState[] = [null, "tanstack-query", "pinia-colada"];
+  const pairs: { clientState: ClientState; asyncState: AsyncState }[] = [];
+  for (const clientState of clients) {
+    for (const asyncState of asyncs) {
+      pairs.push({ clientState, asyncState });
+    }
+  }
+  return pairs;
+}
 
 /**
  * `libs` value for the pre-release build matrix. Optional multiselect packages
@@ -94,46 +130,66 @@ const MATRIX_QUERY: boolean[] = [true, false];
  */
 export const CLI_MATRIX_LIBS_FOR_BUILD: readonly AdditionalLibrary[] = [];
 
+const MATRIX_CLIENT_ASYNC_FACTOR_REACT = clientAsyncPairsForFramework("react").length;
+const MATRIX_CLIENT_ASYNC_FACTOR_VUE = clientAsyncPairsForFramework("vue").length;
+
 /**
  * Count of combinations for the current CLI build matrix (excludes `projectName`;
  * does not vary `libs` — see {@link CLI_MATRIX_LIBS_FOR_BUILD}).
  */
-export const CLI_MATRIX_COMBINATION_COUNT =
-  MATRIX_ARCHITECTURES.length *
-  MATRIX_HTTP_CLIENTS.length *
-  MATRIX_VALIDATION.length *
-  MATRIX_STYLING.length *
-  MATRIX_FORMATTERS.length *
-  MATRIX_ROUTERS.length *
-  MATRIX_QUERY.length;
+export const CLI_MATRIX_COMBINATION_COUNT = MATRIX_FRAMEWORKS.reduce(
+  (sum, framework) => {
+    const r = routersForFramework(framework).length;
+    const ca =
+      framework === "vue"
+        ? MATRIX_CLIENT_ASYNC_FACTOR_VUE
+        : MATRIX_CLIENT_ASYNC_FACTOR_REACT;
+    return (
+      sum +
+      MATRIX_ARCHITECTURES.length *
+        MATRIX_HTTP_CLIENTS.length *
+        MATRIX_VALIDATION.length *
+        MATRIX_STYLING.length *
+        MATRIX_FORMATTERS.length *
+        r *
+        ca
+    );
+  },
+  0,
+);
 
 /**
- * Enumerates {@link CliMatrixOptionBundle} rows for the CLI build matrix: react,
- * all HTTP modes (`axios`, `ofetch`, Fetch/`null`), both formatter presets, and all
- * combinations of architecture / validation / styling / router / tanstackQuery, with a fixed
+ * Enumerates {@link CliMatrixOptionBundle} rows for the CLI build matrix: all
+ * frameworks, HTTP modes, formatters, and combinations of architecture / validation /
+ * styling / router (per framework) / clientState / asyncState, with a fixed
  * {@link CLI_MATRIX_LIBS_FOR_BUILD} `libs` list.
  */
 export function enumerateCliMatrixOptionBundles(): CliMatrixOptionBundle[] {
   const bundles: CliMatrixOptionBundle[] = [];
 
-  for (const architecture of MATRIX_ARCHITECTURES) {
-    for (const httpClient of MATRIX_HTTP_CLIENTS) {
-      for (const validationLibrary of MATRIX_VALIDATION) {
-        for (const styling of MATRIX_STYLING) {
-          for (const formatter of MATRIX_FORMATTERS) {
-            for (const router of MATRIX_ROUTERS) {
-              for (const tanstackQuery of MATRIX_QUERY) {
-                bundles.push({
-                  framework: MATRIX_FRAMEWORK,
-                  architecture,
-                  httpClient,
-                  validationLibrary,
-                  styling,
-                  formatter,
-                  router,
-                  tanstackQuery,
-                  libs: [...CLI_MATRIX_LIBS_FOR_BUILD],
-                });
+  for (const framework of MATRIX_FRAMEWORKS) {
+    const routers = routersForFramework(framework);
+    const clientAsyncPairs = clientAsyncPairsForFramework(framework);
+    for (const architecture of MATRIX_ARCHITECTURES) {
+      for (const httpClient of MATRIX_HTTP_CLIENTS) {
+        for (const validationLibrary of MATRIX_VALIDATION) {
+          for (const styling of MATRIX_STYLING) {
+            for (const formatter of MATRIX_FORMATTERS) {
+              for (const router of routers) {
+                for (const { clientState, asyncState } of clientAsyncPairs) {
+                  bundles.push({
+                    framework,
+                    architecture,
+                    httpClient,
+                    validationLibrary,
+                    styling,
+                    formatter,
+                    router,
+                    clientState,
+                    asyncState,
+                    libs: [...CLI_MATRIX_LIBS_FOR_BUILD],
+                  });
+                }
               }
             }
           }

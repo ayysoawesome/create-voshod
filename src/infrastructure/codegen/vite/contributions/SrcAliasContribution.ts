@@ -1,8 +1,7 @@
-import type { ReactLayoutProfile } from "@/domain/generation/ReactLayoutProfile.js";
-import type { IViteConfigContribution, ViteContributionContext } from "./IViteConfigContribution.js";
+import type { IViteConfigContribution, VitePathProfile, ViteContributionContext } from "./IViteConfigContribution.js";
 import type { ViteConfigEditor } from "../../editors/ViteConfigEditor.js";
 
-function viteAliasEntriesForProfile(profile: ReactLayoutProfile): Record<string, string> {
+function viteAliasEntriesForProfile(profile: VitePathProfile): Record<string, string> {
   const base: Record<string, string> = {
     "@": `path.resolve(__dirname, "src")`,
   };

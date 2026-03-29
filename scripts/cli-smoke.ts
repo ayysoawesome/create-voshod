@@ -83,8 +83,10 @@ async function run(): Promise<void> {
     httpClient: "axios",
     validationLibrary: "zod",
     styling: "css",
+    formatter: "prettier",
     router: "react-router-dom",
-    tanstackQuery: true,
+    clientState: null,
+    asyncState: "tanstack-query",
     libs: [],
   };
   const injectedFixture = cliOptionsToInjectedFixtureJson(

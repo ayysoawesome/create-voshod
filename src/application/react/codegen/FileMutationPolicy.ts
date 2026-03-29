@@ -1,4 +1,5 @@
 import type { ReactLayoutProfile } from '@/domain/generation/ReactLayoutProfile.js';
+import type { VueLayoutProfile } from '@/domain/generation/VueLayoutProfile.js';
 
 /**
  * Relative paths that must be edited zonally (morph / JSON merge / targeted HTML),
@@ -35,6 +36,7 @@ export const FULL_REPLACE_OK_PREFIXES = [
   'src/components/',
   'src/hooks/',
   'src/utils/',
+  'src/layouts/',
 ] as const;
 
 export type FullReplaceOkPrefix = (typeof FULL_REPLACE_OK_PREFIXES)[number];
@@ -44,9 +46,15 @@ export type FullReplaceOkPrefix = (typeof FULL_REPLACE_OK_PREFIXES)[number];
  */
 export const FULL_REPLACE_OK_EXACT_PATHS = [
   'src/router.tsx',
+  'src/router.ts',
   'src/shared/index.ts',
   'src/index.tsx',
   'src/app/index.tsx',
+  'src/main.ts',
+  'src/app/main.ts',
+  'src/App.vue',
+  'src/app/App.vue',
+  'src/shims-vue.d.ts',
 ] as const;
 
 export type FullReplaceOkExactPath = (typeof FULL_REPLACE_OK_EXACT_PATHS)[number];
@@ -57,7 +65,9 @@ export type FullReplaceOkExactPath = (typeof FULL_REPLACE_OK_EXACT_PATHS)[number
  * @param profile Resolved layout profile.
  * @returns `App.tsx` path for the selected architecture.
  */
-export function zonalAppComponentPath(profile: ReactLayoutProfile): string {
+export function zonalAppComponentPath(
+  profile: ReactLayoutProfile | VueLayoutProfile,
+): string {
   return profile.appComponentPath;
 }
 
@@ -83,7 +93,7 @@ export function isZonalOnlyPath(
  */
 export function isFullReplaceOkPath(
   relativePath: string,
-  profile?: ReactLayoutProfile,
+  profile?: ReactLayoutProfile | VueLayoutProfile,
 ): boolean {
   if (isZonalOnlyPath(relativePath)) {
     return false;

@@ -108,7 +108,7 @@
 Пример: добавить `react-i18next`.
 
 1. Добавьте новое значение в `AdditionalLibrary` в `src/domain/generation/ProjectOptions.ts`.
-2. Добавьте этот пункт в `ADDITIONAL_LIBRARY_CHOICES` в `src/presentation/cli/prompts/promptChoices.ts`.
+2. Зарегистрируйте logical id в `src/domain/generation/frameworkCapabilityCatalog.ts` (npm по фреймворкам) и добавьте подпись в `getAdditionalLibraryChoices` / `ADDITIONAL_LIB_TITLES` в `src/presentation/cli/prompts/promptChoices.ts` (при необходимости расширьте `AdditionalLibrary` в `ProjectOptions.ts`).
 3. Проверьте планирование зависимостей:
    - если библиотека устанавливается напрямую из выбранных `libs`, текущего planner уже достаточно;
    - если нужны связанные пакеты, добавьте условную логику в `ReactDependencyPlanner`.

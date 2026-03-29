@@ -53,7 +53,7 @@ const prettierConfig = {
  */
 export class FormatterPatchService implements IReactPatchService {
   supports(context: GenerationContext): boolean {
-    return context.framework === "react";
+    return context.framework === "react" || context.framework === "vue";
   }
 
   async apply(context: GenerationContext, composer: ICodeComposer): Promise<void> {

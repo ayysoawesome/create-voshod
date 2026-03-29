@@ -1,9 +1,14 @@
-import type { ReactLayoutProfile } from "@/domain/generation/ReactLayoutProfile.js";
+import type { Architecture } from "@/domain/generation/ProjectOptions.js";
 import type { ViteConfigEditor } from "../../editors/ViteConfigEditor.js";
+
+/** Minimal layout slice needed for Vite alias paths (React and Vue share FSD/simple rules). */
+export type VitePathProfile = {
+  readonly architecture: Architecture;
+};
 
 export type ViteContributionContext = {
   readonly tailwind: boolean;
-  readonly profile: ReactLayoutProfile;
+  readonly profile: VitePathProfile;
 };
 
 /**
