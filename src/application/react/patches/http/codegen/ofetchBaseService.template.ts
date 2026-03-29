@@ -2,7 +2,8 @@ import type { ValidationCodegenKind } from "./validationProfile.js";
 
 export function ofetchBaseServiceSource(kind: ValidationCodegenKind): string {
   if (kind === "none") {
-    return `import { resolveContentType } from "./resolveContentType";
+    return `import { envConfig } from "../config";
+import { resolveContentType } from "./resolveContentType";
 import { toApiError } from "./errorAdapter";
 import { ofetch } from "ofetch";
 
@@ -104,7 +105,7 @@ export abstract class BaseService {
 
 class RootBaseService extends BaseService {
   constructor() {
-    super({ basePath: "" });
+    super({ basePath: envConfig.apiBaseUrl });
   }
 }
 
@@ -113,6 +114,7 @@ export const baseService = new RootBaseService();
   }
 
   return `import type { ZodType } from "zod";
+import { envConfig } from "../config";
 import { resolveContentType } from "./resolveContentType";
 import { validateResponse } from "./validation";
 import { toApiError } from "./errorAdapter";
@@ -233,7 +235,7 @@ export abstract class BaseService {
 
 class RootBaseService extends BaseService {
   constructor() {
-    super({ basePath: "" });
+    super({ basePath: envConfig.apiBaseUrl });
   }
 }
 

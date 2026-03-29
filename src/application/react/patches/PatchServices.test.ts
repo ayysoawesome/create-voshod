@@ -186,6 +186,8 @@ test('SharedApiPatchService creates ofetch stack under shared/api when ofetch se
 
   const base = composer.getFile('src/shared/api/baseService.ts');
   assert.ok(base?.includes('from \"ofetch\"') || base?.includes("from 'ofetch'"));
+  assert.ok(base?.includes("../config"));
+  assert.ok(base?.includes("basePath: envConfig.apiBaseUrl"));
   assert.ok(base?.includes('resolveContentType'));
   assert.ok(base?.includes("'Content-Type'") || base?.includes('"Content-Type"'));
 
